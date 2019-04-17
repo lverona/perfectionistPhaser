@@ -1,0 +1,13 @@
+The overall board border is
+
+1. Outer rounded rectangle 20.
+
+2. Shrink selection by 8.
+
+
+
+The 68 board border however was
+
+rounded rectangle 5.
+
+Shrink also by 8. Then had to delete the internal stuff several times, to reduce noise around the corners.
