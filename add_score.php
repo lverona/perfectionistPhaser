@@ -8,7 +8,7 @@
 //$num = floor( (mt_rand() / (mt_getrandmax() + 1) ) *15 );
 
 $debug=0;
-error_reporting(0);
+//error_reporting(0);
 require_once('mfunctions.php');
 
 if($debug>0){
@@ -41,6 +41,10 @@ if($_POST){
         $columns=9;
       }
         else{exit();}
+
+    //decode first
+    $_POST['undo_id_one'] = json_decode($_POST['undo_id_one'], true);
+    $_POST['undo_id_two'] = json_decode($_POST['undo_id_two'], true);
 
   $undo_id_one=filter_var_array($_POST['undo_id_one'],FILTER_SANITIZE_STRING);
     if(count($undo_id_one)==0) exit();

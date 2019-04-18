@@ -66,6 +66,13 @@ var week_sign;
 var daily_button;
 var weekly_button;
 var border;
+var board_complete_text1;//since this text is unlikely to fit on one line
+var board_complete_text2;
+var final_score_text;
+var advice_text1;//since this text is unlikely to fit on one line
+var advice_text2;
+var win_image;
+
 
 
 //user preferences
@@ -127,7 +134,15 @@ var preloadAssets = new Phaser.Class({
           frameHeight: 58
       });
 
-      this.load.image("title_background", "assets/img/title_background.png")
+      this.load.image("title_background", "assets/img/title_background.png");
+      this.load.image("gameover_background", "assets/img/gameover_background.png");
+
+      this.load.spritesheet("win_images", "assets/img/win_images.png", {
+          frameWidth: 260,
+          frameHeight: 254
+      });
+
+
 
 
 
@@ -138,16 +153,16 @@ var preloadAssets = new Phaser.Class({
 
       WebFont.load({
               google: {
-                  families: [ 'Ubuntu' ]
+                  families: [ 'Ubuntu', 'Heebo' ]
               }
           });
-
 
         this.scene.launch("showMenu");
         this.scene.launch("gameOver");
         this.scene.sleep("gameOver");
         this.scene.launch("playGame");
         this.scene.sleep("playGame");
+
         this.scene.remove();
 
     }
@@ -164,38 +179,40 @@ var showMenu = new Phaser.Class({
 
         this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "title_background");
 
-        var title_text_1=this.add.text(this.game.renderer.width / 2, 10,'Louigi Verona\'s', { fontFamily:'Verdana', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold' });
+        var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'Louigi Verona\'s', { fontFamily:'Heebo', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold' });
         title_text_1.setOrigin(0.5,0);
 
-        var title_text_2=this.add.text(this.game.renderer.width / 2, 60,'Perfectionist', { fontFamily:'Verdana', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold' });
+        var title_text_2=this.add.text(this.game.renderer.width / 2, 55,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold' });
         title_text_2.setOrigin(0.5,0);
 
-        today_sign=this.add.text(this.game.renderer.width / 2, 235,'', { fontFamily:'Verdana', fontSize: '24pt', color: '#999999', fontStyle: 'bold' });
+        today_sign=this.add.text(this.game.renderer.width / 2, 240,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold' });
         today_sign.setOrigin(0.5,0);
 
         daily_button=this.add.image(this.game.renderer.width / 2, 312, "standard_menu_buttons").setInteractive();
         daily_button.setFrame(0);
         daily_button.object_type='daily_button';
-        daily_button_sign=this.add.text(this.game.renderer.width / 2, 312,'Daily Board', { fontFamily:'Verdana', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        daily_button_sign=this.add.text(this.game.renderer.width / 2, 312,'Daily Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
 
 
-        week_sign=this.add.text(this.game.renderer.width / 2, 395,'', { fontFamily:'Verdana', fontSize: '24pt', color: '#999999', fontStyle: 'bold' });
+        week_sign=this.add.text(this.game.renderer.width / 2, 400,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold' });
         week_sign.setOrigin(0.5,0);
 
         weekly_button=this.add.image(this.game.renderer.width / 2, 472, "standard_menu_buttons").setInteractive();
         weekly_button.setFrame(0);
         weekly_button.object_type='weekly_button';
-        this.add.text(this.game.renderer.width / 2, 472,'Weekly Board', { fontFamily:'Verdana', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        this.add.text(this.game.renderer.width / 2, 472,'Weekly Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
 
-        this.add.text(this.game.renderer.width / 2, 650,'Solutions', { fontFamily:'Verdana', fontSize: '28pt', color: '#999999', fontStyle: 'bold' }).setOrigin(0.5,0);
+        this.add.text(this.game.renderer.width / 2, 650,'Solutions', { fontFamily:'Ubuntu', fontSize: '28pt', color: '#999999', fontStyle: 'bold' }).setOrigin(0.5,0);
 
         var replay_daily_button=this.add.image(this.game.renderer.width / 2, 742, "narrow_menu_buttons").setInteractive();
-        weekly_button.setFrame(0);
-        this.add.text(this.game.renderer.width / 2, 742,'Yesterday\'s Board', { fontFamily:'Verdana', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        replay_daily_button.setFrame(0);
+        replay_daily_button.object_type='replay_daily_button';
+        this.add.text(this.game.renderer.width / 2, 742,'Yesterday\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
 
         var replay_weekly_button=this.add.image(this.game.renderer.width / 2, 840, "narrow_menu_buttons").setInteractive();
-        weekly_button.setFrame(0);
-        this.add.text(this.game.renderer.width / 2, 840,'Last Week\'s Board', { fontFamily:'Verdana', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        replay_weekly_button.setFrame(0);
+        replay_weekly_button.object_type='replay_weekly_button';
+        this.add.text(this.game.renderer.width / 2, 840,'Last Week\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
 
         ServerReadPeriodical();
 
@@ -250,6 +267,10 @@ var showMenu = new Phaser.Class({
       			CreateLevel();
 
             this.scene.switch("playGame");
+          }else if(gameObject.object_type=='replay_daily_button'){
+              current_rboard_seed=replay_daily_board_seed;
+            	current_rboard_type='q';
+            	SetupReplayBoard(current_rboard_type,current_rboard_seed);
           }
 
           },this);
@@ -266,7 +287,48 @@ var gameOver = new Phaser.Class({
         Phaser.Scene.call(this, {key: "gameOver"});
     },
     create: function(){
-      console.log("Yay!");
+
+      this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "gameover_background");
+
+      board_complete_text1 = this.add.text(this.game.renderer.width / 2, 70,'You set a world record', { fontFamily:'Ubuntu', fontSize: '34pt', color: '#3b8adb', fontStyle: 'bold' }).setOrigin(0.5,0);
+      board_complete_text2 = this.add.text(this.game.renderer.width / 2, 125,'for this board!', { fontFamily:'Ubuntu', fontSize: '34pt', color: '#3b8adb', fontStyle: 'bold' }).setOrigin(0.5,0);
+
+      final_score_text = this.add.text(this.game.renderer.width / 2, 225,'You got 51/51', { fontFamily:'Ubuntu', fontSize: '28pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0);
+
+      advice_text1 = this.add.text(this.game.renderer.width / 2, 325,'All players will now have to stay', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999', fontStyle: 'bold' }).setOrigin(0.5,0);
+      advice_text2 = this.add.text(this.game.renderer.width / 2, 370,'within your score', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999', fontStyle: 'bold' }).setOrigin(0.5,0);
+
+      win_image = this.add.image(this.game.renderer.width / 2, 600, "win_images");
+      win_image.setFrame(0);
+
+
+      var play_again_button=this.add.image(this.game.renderer.width / 2, 832, "standard_menu_buttons").setInteractive();
+      play_again_button.setFrame(1);
+      play_again_button.object_type='play_same_board';
+      this.add.text(this.game.renderer.width / 2, 832,'Play Same Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+
+      var goto_menu__button=this.add.image(this.game.renderer.width / 2, 932, "standard_menu_buttons").setInteractive();
+      goto_menu__button.setFrame(0);
+      goto_menu__button.object_type='goto_menu';
+      this.add.text(this.game.renderer.width / 2, 932,'Go To Menu', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+
+
+
+      this.input.on('gameobjectdown', function(pointer,gameObject){
+
+        if(gameObject.object_type=='play_same_board'){
+
+            PlayAudio2(6);
+            this.scene.switch("playGame");
+            CreateLevel();
+
+          }else if(gameObject.object_type=='goto_menu'){
+            PlayAudio2(6);
+            this.scene.switch("showMenu");
+          }
+
+        },this);
+
     }
 });
 
@@ -279,8 +341,6 @@ var playGame = new Phaser.Class({
     create: function(){
 
         PhaserContext=this;
-
-        //this.input.mouse.disableContextMenu();
 
         blockNumGroup = this.add.group();
         blockGroup = this.add.group();
@@ -299,18 +359,21 @@ var playGame = new Phaser.Class({
         top_panel_border_100=this.add.image(15,66,"top_panel_border_100");
         top_panel_border_100.setOrigin(0);//to use normal coordinates
 
-        undo_button=this.add.image(20,16,"undo_button").setInteractive();
-        undo_button.setFrame(1);
-        undo_button.setOrigin(0);//to use normal coordinates
-        undo_button.object_type='undo_button';
+        your_best_text=this.add.text(286,24,'Your best on this board: ?', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#555', fontStyle: 'bold' });
+        your_best_text.setOrigin(0);
+
+        rules_button=this.add.image(20,16,"rules_button").setInteractive();
+        rules_button.setOrigin(0);
+        rules_button.object_type='rules_button';
 
         menu_button=this.add.image(20,1062,"menu_button").setInteractive();
         menu_button.setOrigin(0);
         menu_button.object_type='menu_button';
 
-        rules_button=this.add.image(540,1062,"rules_button").setInteractive();
-        rules_button.setOrigin(0);
-        rules_button.object_type='rules_button';
+        undo_button=this.add.image(540,1062,"undo_button").setInteractive();
+        undo_button.setFrame(1);
+        undo_button.setOrigin(0);//to use normal coordinates
+        undo_button.object_type='undo_button';
 
         border = this.add.image(360,601,"border_68");
 
@@ -397,7 +460,105 @@ var playGame = new Phaser.Class({
 
 
 function gameover_on(){
+
+  PlayAudio2(8);
+
+  //console.log(board_seed);
+  //console.log(board_type);
+  //console.log(burn);
+  //console.log(undo_id_one);
+  //console.log(undo_id_two);
+
+  endgame=0;//resetting endgame status
+
+	//saving your personal best, making sure the board seed is the same
+	if(burn<your_daily_best[1] && your_daily_best[0]==board_seed){
+		your_daily_best[1]=burn;
+		localStorage.setItem('your_daily_best', JSON.stringify(your_daily_best));
+	}
+	if(burn<your_weekly_best[1] && your_weekly_best[0]==board_seed){
+		your_weekly_best[1]=burn;
+		localStorage.setItem('your_weekly_best', JSON.stringify(your_weekly_best));
+	}
+
+	//setting win image and message
+	if(burn<min_burn || min_burn==0){
+		//image
+    win_image.setFrame(0);
+		//message
+    board_complete_text1.setText('You set a world record');
+    board_complete_text2.setText('for this board!');
+    board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
+    board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+		//score info
+    final_score_text.setText("New minimum is now "+burn+"!");
+		//advice
+    advice_text1.setText('All players will now have to stay');
+    advice_text2.setText('within your score');
+    advice_text1.x=PhaserContext.game.renderer.width / 2;
+    advice_text2.x=PhaserContext.game.renderer.width / 2;
+
+		//sending new min_burn to the server
+		min_burn=burn;
+		UpdateScore();
+		ServerAddScore();
+
+	//beat board but no new record
+	}else if(burn==min_burn){
+		//image
+		win_image.setFrame(0);
+		//message
+    board_complete_text1.setText('Board complete!');
+    board_complete_text2.setText('');
+    board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
+    board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+		//score info
+    final_score_text.setText("You got "+burn+"/"+min_burn+"!");
+    final_score_text.x=PhaserContext.game.renderer.width / 2;
+		//advice
+    advice_text1.setText('You matched the current world record');
+    advice_text2.setText('for this board!');
+    advice_text1.x=PhaserContext.game.renderer.width / 2;
+    advice_text2.x=PhaserContext.game.renderer.width / 2;
+
+	//lost the board
+	}else{
+		//image
+		win_image.setFrame(2);
+		//message
+    board_complete_text1.setText('Try again');
+    board_complete_text2.setText('');
+    board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
+    board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+		//score info
+    final_score_text.setText("You got "+burn+"/"+min_burn);
+    final_score_text.x=PhaserContext.game.renderer.width / 2;
+		//advice
+		if((burn-min_burn)<10){
+			win_image.setFrame(1);
+
+      board_complete_text1.setText('Very good!');
+      board_complete_text2.setText('');
+      board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
+      board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+
+      advice_text1.setText("Just " + (burn-min_burn) + " away");
+      advice_text2.setText('from the current world record!');
+      advice_text1.x=PhaserContext.game.renderer.width / 2;
+      advice_text2.x=PhaserContext.game.renderer.width / 2;
+
+		}else{
+
+      advice_text1.setText((burn-min_burn) + " away from the");
+      advice_text2.setText('current world record!');
+      advice_text1.x=PhaserContext.game.renderer.width / 2;
+      advice_text2.x=PhaserContext.game.renderer.width / 2;
+		}
+
+	}
+
   PhaserContext.scene.switch("gameOver");
+
 }
 
 
@@ -437,14 +598,26 @@ function CreateLevel(){
     board_columns=6;
     border = PhaserContext.add.image(360,601,"border_100");
     menu_button.x=20;menu_button.y=1062;
-    rules_button.x=540;rules_button.y=1062;
+    undo_button.x=540;undo_button.y=1062;
+    if(IsDailyBoard()){
+        if(your_daily_best[1]==999){your_best_text.setText("");}
+        else{your_best_text.setText("Your best on this board: "+your_daily_best[1]);}
+      }else{
+        your_best_text.setText('Board seed: <a class="sand" href="?seed='+board_seed+'&board=q">'+board_seed+'</a>');
+      }
   }else{
     total_blocks=99;
     board_rows=11;
     board_columns=9;
     border = PhaserContext.add.image(360,565,"border_68");
     menu_button.x=20;menu_button.y=990;
-    rules_button.x=540;rules_button.y=990;
+    undo_button.x=540;undo_button.y=990;
+    if(IsWeeklyBoard()){
+        if(your_weekly_best[1]==999){your_best_text.setText("");}
+        else{your_best_text.setText("Your best on this board: "+your_weekly_best[1]);}
+      }else{
+        your_best_text.setText('Board seed: <a class="sand" href="?seed='+board_seed+'&board=q">'+board_seed+'</a>');
+      }
   }
 
   total_blocks=board_columns*board_rows;
@@ -466,10 +639,10 @@ function CreateLevel(){
 
         if(board_type=='q'){
           var block = PhaserContext.add.image(85+110*(x),106+110*(y+1),"blocks_large_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Verdana', fontSize: '32pt', color: '#000' });
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000' });
         }else{
           var block = PhaserContext.add.image(64+74*(x),121+74*(y+1),"blocks_small_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Verdana', fontSize: '24pt', color: '#000' });
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000' });
         }
 
 
@@ -482,6 +655,88 @@ function CreateLevel(){
         block.object_type='interactive_block';
 
 
+
+        block_num.setOrigin(0.5);
+        block_num.blocknum_id=i;
+        block_num.blocknum_value=value+1;
+
+        i++;
+
+        blockGroup.add(block);
+        blockNumGroup.add(block_num);
+
+            }//x
+        }//y
+
+
+
+
+}
+function CreateReplayLevel(){
+
+  blockGroup.clear(true,true);
+  blockNumGroup.clear(true,true);
+  border.destroy();
+
+  is_there_board=1;
+	endgame=0;
+	min_burn=999;//resetting min_burn for new board
+
+	current_move=0;
+	undo_button.setFrame(1);
+	burn=0;//resetting burn
+	UpdateScore();
+	undo_id_one=[];//resetting id history
+	undo_id_two=[];
+
+  if(board_type=='q'){
+    total_blocks=48;
+    board_rows=8;
+    board_columns=6;
+    border = PhaserContext.add.image(360,601,"border_100");
+    menu_button.x=20;menu_button.y=1062;
+    undo_button.x=540;undo_button.y=1062;
+
+  }else{
+    total_blocks=99;
+    board_rows=11;
+    board_columns=9;
+    border = PhaserContext.add.image(360,565,"border_68");
+    menu_button.x=20;menu_button.y=990;
+    undo_button.x=540;undo_button.y=990;
+  }
+
+  your_best_text.setText("");
+
+  total_blocks=board_columns*board_rows;
+  blocks_left_text.setText("Blocks left: " + total_blocks);
+  ServerReadScore();//reading the min_burn from server, if it exists
+
+    var m = new MersenneTwister(board_seed);
+
+    let i=0;//block id
+
+    //building a play field
+    for (var y = 0; y < board_rows; y++) {
+      for (var x = 0; x < board_columns; x++) {
+      var value = Math.floor(m.random()*15);
+
+        if(board_type=='q'){
+          var block = PhaserContext.add.image(85+110*(x),106+110*(y+1),"blocks_large_default");
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000' });
+        }else{
+          var block = PhaserContext.add.image(64+74*(x),121+74*(y+1),"blocks_small_default");
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000' });
+        }
+
+
+        //setting a color
+        block.setFrame(value);
+
+        block.block_id=i;
+        block.block_row=y;
+        block.block_col=x;
+        block.object_type='replay_block';
 
         block_num.setOrigin(0.5);
         block_num.blocknum_id=i;
@@ -669,7 +924,7 @@ function RestoreBlock(block_id,value_id){
 function BlockDoubleclick(block){
 
         var block_num = blockNumGroup.getChildren();
-        var one = block_num[block.block_id];
+        var one = block_num[block.block_id].blocknum_value;
 
 				firstblk='';//resetting click
 				prevblk='';//variables
@@ -874,13 +1129,16 @@ function ServerAddScore(){
 	//min_burn, verifying it was recorded.
 	min_burn_server_verified=0;
 
+  var uio_stringified = JSON.stringify(undo_id_one);
+  var uit_stringified = JSON.stringify(undo_id_two);
 
   var xhttp = new XMLHttpRequest();
+
 
   xhttp.open("POST", "add_score.php", true);
   xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   xhttp.timeout = 5000;
-  xhttp.send("board_seed="+board_seed+"&board_type="+board_type+"&lost="+burn+"&undo_id_one="+undo_id_one+"&undo_id_two="+undo_id_two);
+  xhttp.send("board_seed="+board_seed+"&board_type="+board_type+"&lost="+burn+"&undo_id_one="+uio_stringified+"&undo_id_two="+uit_stringified);
 
   xhttp.onreadystatechange = function() {
 
@@ -1097,6 +1355,153 @@ function ServerReadPeriodical(){
   }//success
 
 }
+
+
+//////////////////////////
+//REPLAY
+//////////////////////////
+
+function SetupReplayBoard(rboard_type,rboard_seed){
+
+  //setup visuals
+    //here
+
+	PlayAudio2(6);
+
+	//setting board seed
+	board_seed=rboard_seed;
+
+	if(rboard_type=='q'){
+		replay_length=replay_daily_first.length-1;//amount if steps in a replay
+	}else{
+		replay_length=replay_weekly_first.length-1;//amount if steps in a replay
+	}
+
+  CreateReplayLevel();
+
+	//the seed is immediately removed, so that the menu will not show the "Reload this board" option
+	board_seed='';
+
+	current_move=1;//we start with move 1, and current_move is being iterated on in BlockDrop
+
+}
+
+function RunReplaySimulation(){
+
+	var stage=0;//which stage of the replay are we: selecting first block, selecting second block, or executing a move
+
+	//a correction, just in case current_move is less than 1
+	if(current_move<=0){current_move=1;}
+	//and a correction in case we are beyond the last replay frame
+	else if(current_move>=replay_length){
+		SetupReplayBoard(current_rboard_type,current_rboard_seed);
+	}
+
+		replay_interval = setInterval(function (){
+
+
+						//creating objects out of data-keys
+						if(current_rboard_type=='q'){
+							var first = $('*[data-key="'+replay_daily_first[current_move]+'"]');
+							var second = $('*[data-key="'+replay_daily_second[current_move]+'"]');
+						}else{
+							var first = $('*[data-key="'+replay_weekly_first[current_move]+'"]');
+							var second = $('*[data-key="'+replay_weekly_second[current_move]+'"]');
+						}
+
+
+			switch(stage){
+
+				case 0:
+					$(first).css("border","1px solid #fff");
+					PlayAudio2(6);
+					stage++;
+					//so that if there is a "doublelick", we skip stage 1
+					if(total_blocks==1){stage++;}
+				break;
+
+				case 1:
+					$(second).css("border","1px solid #fff");
+					PlayAudio2(6);
+					stage++;
+				break;
+
+				case 2:
+					//this has to be here so that we don't stop the replay prematurely
+					if(current_move==replay_length){
+						clearInterval(replay_interval);
+
+						setTimeout(function (){SetupReplayBoard(current_rboard_type,current_rboard_seed);}, 750);
+
+						//working the PLAY button
+						replay_is_active=0;
+						ReplayButtonState(replay_is_active);
+						//reset the step by step stage
+						replay_stage=0;
+					}
+
+					$(first).css("border","1px solid #777");
+					$(second).css("border","1px solid #777");
+					if(total_blocks==1){BlockDoubleclick(first);PlayAudio2(9);}
+					else{BlockDrop(first,second);}
+
+					stage=0;
+				break;
+			}
+
+		}, 450);
+
+}
+
+function RunReplayStep(){
+
+		//a correction, just in case current_move is less than 1
+		if(current_move<=0){current_move=1;}
+
+						//creating objects out of data-keys
+						if(current_rboard_type=='q'){
+							var first = $('*[data-key="'+replay_daily_first[current_move]+'"]');
+							var second = $('*[data-key="'+replay_daily_second[current_move]+'"]');
+						}else{
+							var first = $('*[data-key="'+replay_weekly_first[current_move]+'"]');
+							var second = $('*[data-key="'+replay_weekly_second[current_move]+'"]');
+						}
+
+
+				switch(replay_stage){
+
+					case 0:
+						$(first).css("border","1px solid #fff");
+						PlayAudio2(6);
+						replay_stage++;
+						//so that if there is a "doublelick", we skip stage 1
+						if(total_blocks==1){replay_stage++;}
+					break;
+
+					case 1:
+						$(second).css("border","1px solid #fff");
+						PlayAudio2(6);
+						replay_stage++;
+					break;
+
+					case 2:
+
+						$(first).css("border","1px solid #777");
+						$(second).css("border","1px solid #777");
+						if(total_blocks==1){BlockDoubleclick(first);PlayAudio2(9);}
+						else{BlockDrop(first,second);}
+
+						replay_stage=0;
+					break;
+				}
+
+}
+
+
+
+
+
+
 
 var markers = [
     { name: 'zero', start: 0, duration: 0.2, config: {} },
