@@ -137,6 +137,9 @@ var preloadAssets = new Phaser.Class({
       this.load.image("title_background", "assets/img/title_background.png");
       this.load.image("gameover_background", "assets/img/gameover_background.png");
 
+      this.load.image("white_block_border_100","assets/img/white_block_border_100.png");
+      this.load.image("white_block_border_68","assets/img/white_block_border_68.png");
+
       this.load.spritesheet("win_images", "assets/img/win_images.png", {
           frameWidth: 260,
           frameHeight: 254
@@ -214,8 +217,10 @@ var showMenu = new Phaser.Class({
         replay_weekly_button.object_type='replay_weekly_button';
         this.add.text(this.game.renderer.width / 2, 840,'Last Week\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
 
+        //getting the daily and weekly board
         ServerReadPeriodical();
-
+        //getting yesterday's and previous week's solutions
+        ServerReadReplay();
 
         this.input.on('gameobjectdown', function(pointer,gameObject){
 
@@ -271,6 +276,12 @@ var showMenu = new Phaser.Class({
               current_rboard_seed=replay_daily_board_seed;
             	current_rboard_type='q';
             	SetupReplayBoard(current_rboard_type,current_rboard_seed);
+              this.scene.switch("playGame");
+          }else if(gameObject.object_type=='replay_weekly_button'){
+              current_rboard_seed=replay_weekly_board_seed;
+            	current_rboard_type='f';
+            	SetupReplayBoard(current_rboard_type,current_rboard_seed);
+              this.scene.switch("playGame");
           }
 
           },this);
@@ -1219,7 +1230,7 @@ function ServerReadReplay(){
 
   var xhttp = new XMLHttpRequest();
 
-  xhttp.open("POST", "read_score.php", true);
+  xhttp.open("POST", "read_replay.php", true);
   xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   xhttp.timeout = 5000;
   xhttp.send();
@@ -1228,10 +1239,10 @@ function ServerReadReplay(){
 
       if (this.readyState == 4 && this.status == 200) {
         if (!this.responseText){
-  				$('#replay_daily_sign').text("");
-  				$('#replay_daily_button').attr('class','button_menu_disabled');
-  				$('#replay_weekly_sign').text("");
-  				$('#replay_weekly_button').attr('class','button_menu_disabled');
+  				//$('#replay_daily_sign').text("");
+  				//$('#replay_daily_button').attr('class','button_menu_disabled');
+  				//$('#replay_weekly_sign').text("");
+  				//$('#replay_weekly_button').attr('class','button_menu_disabled');
   				return false;
   			}
 
@@ -1243,13 +1254,13 @@ function ServerReadReplay(){
   			replay_weekly_second= JSON.parse(replay[4]);
   			replay_weekly_board_seed=replay[5];
 
-  			$('#replay_daily_sign').text("Solution From Yesterday");
-  			$('#replay_daily_button').text("Yesterday's Board");
-  			$('#replay_daily_button').attr('class','button_menu_solution');
+  			//$('#replay_daily_sign').text("Solution From Yesterday");
+  			//$('#replay_daily_button').text("Yesterday's Board");
+  			//$('#replay_daily_button').attr('class','button_menu_solution');
 
-  			$('#replay_weekly_sign').text("Solution From Last Week");
-  			$('#replay_weekly_button').text("Last Week's Board");
-  			$('#replay_weekly_button').attr('class','button_menu_solution');
+  			//$('#replay_weekly_sign').text("Solution From Last Week");
+  			//$('#replay_weekly_button').text("Last Week's Board");
+  			//$('#replay_weekly_button').attr('class','button_menu_solution');
       }
     }
 }
@@ -1372,14 +1383,16 @@ function SetupReplayBoard(rboard_type,rboard_seed){
 	board_seed=rboard_seed;
 
 	if(rboard_type=='q'){
+    board_type='q';
 		replay_length=replay_daily_first.length-1;//amount if steps in a replay
 	}else{
+    board_type='f';
 		replay_length=replay_weekly_first.length-1;//amount if steps in a replay
 	}
 
   CreateReplayLevel();
 
-	//the seed is immediately removed, so that the menu will not show the "Reload this board" option
+	//the seed is immediately removed, so that we know it is a replay
 	board_seed='';
 
 	current_move=1;//we start with move 1, and current_move is being iterated on in BlockDrop
@@ -1387,6 +1400,9 @@ function SetupReplayBoard(rboard_type,rboard_seed){
 }
 
 function RunReplaySimulation(){
+
+  var block_num = blockNumGroup.getChildren();
+  var block = blockGroup.getChildren();
 
 	var stage=0;//which stage of the replay are we: selecting first block, selecting second block, or executing a move
 
@@ -1400,13 +1416,24 @@ function RunReplaySimulation(){
 		replay_interval = setInterval(function (){
 
 
-						//creating objects out of data-keys
+
+						//accessing the two necessary blocks and adding border images
 						if(current_rboard_type=='q'){
-							var first = $('*[data-key="'+replay_daily_first[current_move]+'"]');
-							var second = $('*[data-key="'+replay_daily_second[current_move]+'"]');
+              var first = block[replay_daily_first[current_move]];
+              var second = block[replay_daily_second[current_move]];
+
+              var white_block_first=PhaserContext.add.image(0,0,"white_block_border_100");
+              white_block_first.visible=false;
+              var white_block_second=PhaserContext.add.image(0,0,"white_block_border_100");
+              white_block_second.visible=false;
 						}else{
-							var first = $('*[data-key="'+replay_weekly_first[current_move]+'"]');
-							var second = $('*[data-key="'+replay_weekly_second[current_move]+'"]');
+              var first = block[replay_weekly_first[current_move]];
+              var second = block[replay_weekly_second[current_move]];
+
+              var white_block_first=PhaserContext.add.image(0,0,"white_block_border_68");
+              white_block_first.visible=false;
+              var white_block_second=PhaserContext.add.image(0,0,"white_block_border_68");
+              white_block_second.visible=false;
 						}
 
 

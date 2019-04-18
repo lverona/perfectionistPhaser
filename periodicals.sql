@@ -1,0 +1,81 @@
+-- phpMyAdmin SQL Dump
+-- version 4.0.10deb1ubuntu0.1
+-- http://www.phpmyadmin.net
+--
+-- Host: localhost
+-- Generation Time: Apr 18, 2019 at 11:30 AM
+-- Server version: 5.5.62-0ubuntu0.14.04.1
+-- PHP Version: 7.1.27-1+ubuntu14.04.1+deb.sury.org+1
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
+--
+-- Database: `perfectionist`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `periodicals`
+--
+
+CREATE TABLE IF NOT EXISTS `periodicals` (
+  `seed` int(11) NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `date` smallint(6) NOT NULL,
+  `year` smallint(6) NOT NULL,
+  PRIMARY KEY (`seed`),
+  KEY `type` (`type`),
+  KEY `date` (`date`),
+  KEY `year` (`year`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `periodicals`
+--
+
+INSERT INTO `periodicals` (`seed`, `type`, `date`, `year`) VALUES
+(43796438, 1, 94, 2019),
+(61539036, 1, 97, 2019),
+(91005120, 1, 89, 2019),
+(91064044, 1, 84, 2019),
+(96470892, 1, 102, 2019),
+(143689845, 1, 81, 2019),
+(230677918, 1, 104, 2019),
+(246407218, 2, 15, 2019),
+(280202977, 1, 83, 2019),
+(303567618, 1, 90, 2019),
+(391824592, 1, 93, 2019),
+(434381698, 1, 86, 2019),
+(447036164, 1, 80, 2019),
+(516131915, 1, 88, 2019),
+(545320574, 1, 95, 2019),
+(657729824, 1, 101, 2019),
+(707619835, 1, 107, 2019),
+(840503081, 1, 91, 2019),
+(905159585, 1, 106, 2019),
+(932507269, 2, 14, 2019),
+(1047369742, 1, 87, 2019),
+(1151788195, 1, 99, 2019),
+(1275866088, 1, 85, 2019),
+(1279453498, 1, 92, 2019),
+(1327748919, 1, 105, 2019),
+(1328043913, 1, 100, 2019),
+(1369132867, 1, 98, 2019),
+(1383487041, 1, 103, 2019),
+(1593369451, 1, 82, 2019),
+(1651063086, 2, 13, 2019),
+(1885930846, 2, 16, 2019),
+(1985835963, 1, 96, 2019),
+(2052433686, 2, 12, 2019);
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
