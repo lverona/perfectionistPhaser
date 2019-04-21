@@ -72,6 +72,9 @@ var final_score_text;
 var advice_text1;//since this text is unlikely to fit on one line
 var advice_text2;
 var win_image;
+var replay_play;
+var replay_bck;
+var replay_fwd;
 
 
 
@@ -145,6 +148,13 @@ var preloadAssets = new Phaser.Class({
           frameHeight: 254
       });
 
+      this.load.image("replay_bck", "assets/img/replay_bck.png");
+      this.load.image("replay_fwd", "assets/img/replay_fwd.png");
+      this.load.spritesheet("replay_play", "assets/img/replay.png", {
+          frameWidth: 58,
+          frameHeight: 44
+      });
+
 
 
 
@@ -159,6 +169,8 @@ var preloadAssets = new Phaser.Class({
                   families: [ 'Ubuntu', 'Heebo' ]
               }
           });
+
+
 
         this.scene.launch("showMenu");
         this.scene.launch("gameOver");
@@ -242,10 +254,7 @@ var showMenu = new Phaser.Class({
             else{return false;}
 
             //switching from replay mode
-            //document.getElementById("standard_top_panel").style.display = "table-row";
-            //document.getElementById("replay_top_panel").style.display = "none";
-            //document.getElementById("standard_menu").style.display = "table-row";
-            //document.getElementById("replay_menu").style.display = "none";
+            ReplayPanel(0);
 
             PlayAudio2(6,this);
 
@@ -262,10 +271,7 @@ var showMenu = new Phaser.Class({
       			else{return false;}
 
       			//switching from replay mode
-      			//document.getElementById("standard_top_panel").style.display = "table-row";
-      			//document.getElementById("replay_top_panel").style.display = "none";
-      			//document.getElementById("standard_menu").style.display = "table-row";
-      			//document.getElementById("replay_menu").style.display = "none";
+      			ReplayPanel(0);
 
       			PlayAudio2(6);
 
@@ -361,16 +367,16 @@ var playGame = new Phaser.Class({
 
         //debug=this.add.text(10,10,'', { fill: '#00ff00' });
 
-        blocks_left_text=this.add.text(464,82,'Blocks left: 99', { fontFamily:'Ubuntu', fontSize: '25pt', color: '#e8a015' });
+        blocks_left_text=this.add.text(40,82,'Blocks left: 99', { fontFamily:'Ubuntu', fontSize: '25pt', color: '#e8a015' });
         blocks_left_text.setOrigin(0);
 
-        lost_text=this.add.text(40,82,'Lost: 0/?', { fontFamily:"'Ubuntu',serif", fontSize: '25pt', color: '#e8a015' });
+        lost_text=this.add.text(553,82,'Lost: 0/?', { fontFamily:"'Ubuntu',serif", fontSize: '25pt', color: '#e8a015' });
         lost_text.setOrigin(0);
 
         top_panel_border_100=this.add.image(15,66,"top_panel_border_100");
         top_panel_border_100.setOrigin(0);//to use normal coordinates
 
-        your_best_text=this.add.text(286,24,'Your best on this board: ?', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#555', fontStyle: 'bold' });
+        your_best_text=this.add.text(309,24,'Your best on this board: ?', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#555', fontStyle: 'bold' });
         your_best_text.setOrigin(0);
 
         rules_button=this.add.image(20,16,"rules_button").setInteractive();
@@ -386,14 +392,31 @@ var playGame = new Phaser.Class({
         undo_button.setOrigin(0);//to use normal coordinates
         undo_button.object_type='undo_button';
 
+
+
+        replay_bck=this.add.image(431,1062,"replay_bck").setInteractive().setInteractive(false);
+        replay_bck.setOrigin(0);
+        replay_bck.alpha=0;
+        replay_bck.object_type='replay_bck';
+
+        replay_play=this.add.image(531,1062,"replay_play").setInteractive().setInteractive(false);
+        replay_play.setFrame(0);
+        replay_play.setOrigin(0);
+        replay_play.alpha=0;
+        replay_play.object_type='replay_play';
+
+        replay_fwd=this.add.image(631,1062,"replay_fwd").setInteractive().setInteractive(false);
+        replay_fwd.setOrigin(0);
+        replay_fwd.alpha=0;
+        replay_fwd.object_type='replay_fwd';
+
+
         border = this.add.image(360,601,"border_68");
 
 
 
 
     this.input.on('gameobjectdown', function(pointer,gameObject){
-
-      //this.input.stopPropagation();
 
 
       if(gameObject.object_type=='interactive_block'){
@@ -425,7 +448,7 @@ var playGame = new Phaser.Class({
 
                   clearInterval(replay_interval);
                   replay_is_active=0;
-                  //ReplayButtonState(replay_is_active);
+                  replay_play.setFrame(0);
 
                   //otherwise a reload level might create a bug, since firstblk will then no longer exist
                   firstblk='';//resetting click
@@ -451,14 +474,72 @@ var playGame = new Phaser.Class({
           firstblk=gameObject;
           prevblk=gameObject;
           BlockDoubleclick(firstblk);
-        }
+        }else if(gameObject.object_type=='replay_bck'){
+          if(replay_is_active==0 && current_move>1){
+        		Undo();
+        		replay_stage=0;//doing undo resets the replay_stage of the forward button, since now we have to start the next move all over
+        		//$(".numblock").css("border","1px solid #777");
+        		//$(".numblock").off();
+        	}
+        }else if(gameObject.object_type=='replay_fwd'){
+            if(replay_is_active==0 && current_move<=replay_length){
+              RunReplayStep();
+            }
+        }else if(gameObject.object_type=='replay_play'){
+
+              var block_num = blockNumGroup.getChildren();
+              var block = blockGroup.getChildren();
+
+              if(replay_is_active==0){
+          		//PLAY button
+          		replay_is_active=1;
+          		replay_play.setFrame(1);
+          		PlayAudio2(9);
+
+              //accessing the two necessary blocks and resetting selected blocks
+              if(current_rboard_type=='q'){
+                var first = block[replay_daily_first[current_move]];
+                var second = block[replay_daily_second[current_move]];
+              }else{
+                var first = block[replay_weekly_first[current_move]];
+                var second = block[replay_weekly_second[current_move]];
+              }
+              first.setFrame(first.block_value-1);
+              second.setFrame(second.block_value-1);
+
+          		RunReplaySimulation();
+
+          	}else{
+
+          			replay_is_active=0;
+          			replay_play.setFrame(0);
+          			PlayAudio2(9);
+
+          			//reset the step by step stage
+          			replay_stage=0;
+
+          			//stopping the simulation and resetting selected blocks
+          			clearInterval(replay_interval);
+          			if(current_rboard_type=='q'){
+                  var first = block[replay_daily_first[current_move]];
+                  var second = block[replay_daily_second[current_move]];
+          			}else{
+                  var first = block[replay_weekly_first[current_move]];
+                  var second = block[replay_weekly_second[current_move]];
+          			}
+                first.setFrame(first.block_value-1);
+                second.setFrame(second.block_value-1);
+
+          	}
+          }
+
+
+
       },this);
 
 
 
 
-
-        //CreateLevel();
 
     }
 
@@ -572,11 +653,28 @@ function gameover_on(){
 
 }
 
+function yourbestscore_position(number=0){
+  var spaces=0;//amount of spaces to move the sign
+
+  if(number>9 && number<100){spaces+=1;}
+  else if(number>=100){spaces+=2;}
+
+  your_best_text.x=309-18*spaces;
+}
 
 function UpdateScore(){
 
-		if(min_burn==999){
+    var spaces=0;//amount of spaces to move the sign
 
+    if(burn>9 && burn<100){spaces+=1;}
+    else if(burn>=100){spaces+=2;}
+
+    if(min_burn>9 && min_burn<100){spaces+=1;}
+    else if(min_burn>=100 && min_burn<999){spaces+=2;}
+
+    lost_text.x=553-20*spaces;
+
+		if(min_burn==999){
       lost_text.setText("Lost: " + burn + "/?");
 		}
 		else{
@@ -599,7 +697,7 @@ function CreateLevel(){
 	current_move=0;
 	undo_button.setFrame(1);
 	burn=0;//resetting burn
-	UpdateScore();
+	//UpdateScore();
 	undo_id_one=[];//resetting id history
 	undo_id_two=[];
 
@@ -610,12 +708,15 @@ function CreateLevel(){
     border = PhaserContext.add.image(360,601,"border_100");
     menu_button.x=20;menu_button.y=1062;
     undo_button.x=540;undo_button.y=1062;
-    if(IsDailyBoard()){
-        if(your_daily_best[1]==999){your_best_text.setText("");}
-        else{your_best_text.setText("Your best on this board: "+your_daily_best[1]);}
-      }else{
-        your_best_text.setText('Board seed: <a class="sand" href="?seed='+board_seed+'&board=q">'+board_seed+'</a>');
-      }
+        if(IsDailyBoard()){
+            if(your_daily_best[1]==999){your_best_text.setText("");}
+            else{
+              your_best_text.setText("Your best on this board: "+your_daily_best[1]);
+              yourbestscore_position(your_daily_best[1]);
+            }
+        }else{
+            your_best_text.setText('Board seed: <a class="sand" href="?seed='+board_seed+'&board=q">'+board_seed+'</a>');
+        }
   }else{
     total_blocks=99;
     board_rows=11;
@@ -625,7 +726,7 @@ function CreateLevel(){
     undo_button.x=540;undo_button.y=990;
     if(IsWeeklyBoard()){
         if(your_weekly_best[1]==999){your_best_text.setText("");}
-        else{your_best_text.setText("Your best on this board: "+your_weekly_best[1]);}
+        else{your_best_text.setText("Your best on this board: "+your_weekly_best[1]);yourbestscore_position(your_weekly_best[1]);}
       }else{
         your_best_text.setText('Board seed: <a class="sand" href="?seed='+board_seed+'&board=q">'+board_seed+'</a>');
       }
@@ -663,6 +764,7 @@ function CreateLevel(){
         block.block_id=i;
         block.block_row=y;
         block.block_col=x;
+        block.block_value=value+1;
         block.object_type='interactive_block';
 
 
@@ -733,10 +835,10 @@ function CreateReplayLevel(){
       var value = Math.floor(m.random()*15);
 
         if(board_type=='q'){
-          var block = PhaserContext.add.image(85+110*(x),106+110*(y+1),"blocks_large_default");
+          var block = PhaserContext.add.image(85+110*(x),106+110*(y+1),"blocks_large_default").setInteractive();
           var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000' });
         }else{
-          var block = PhaserContext.add.image(64+74*(x),121+74*(y+1),"blocks_small_default");
+          var block = PhaserContext.add.image(64+74*(x),121+74*(y+1),"blocks_small_default").setInteractive();
           var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000' });
         }
 
@@ -744,10 +846,14 @@ function CreateReplayLevel(){
         //setting a color
         block.setFrame(value);
 
+        //it turns out one cannot call SetInteractive(false) on a game object that had not been set to interactive in the first place; therefore, I first set all blocks to interactive and then set it to false, since later on block removals will call setInteractive(false) on the blocks
+        //block.setInteractive(false);
+
         block.block_id=i;
         block.block_row=y;
         block.block_col=x;
-        block.object_type='replay_block';
+        block.block_value=value+1;
+        block.object_type='replay_block';//this guarantees that even when Undo makes blocks interactive through RestoreBlock, clicking on them does nothing;
 
         block_num.setOrigin(0.5);
         block_num.blocknum_id=i;
@@ -826,6 +932,7 @@ function BlockDrop(first,second){
 
 				RemoveBlock(first);
 
+        second.block_value=new_index;
         block_num[id_two].blocknum_value=new_index;
         block_num[id_two].setText(new_index);
 
@@ -920,6 +1027,7 @@ function RestoreBlock(block_id,value_id){
   one.setText(value_id);
 
   block[block_id].alpha=1;
+  block[block_id].block_value=value_id;
   block[block_id].setInteractive();
 
   //working colors
@@ -1372,10 +1480,35 @@ function ServerReadPeriodical(){
 //REPLAY
 //////////////////////////
 
+function ReplayPanel(state=0){
+  if(state==0){
+    undo_button.alpha=1;
+    replay_play.alpha=0;
+    replay_bck.alpha=0;
+    replay_fwd.alpha=0;
+
+    replay_play.setInteractive(false);
+    replay_bck.setInteractive(false);
+    replay_fwd.setInteractive(false);
+
+  }else if(state==1){
+    undo_button.alpha=0;
+    replay_play.alpha=1;
+    replay_bck.alpha=1;
+    replay_fwd.alpha=1;
+
+    replay_play.setInteractive();
+    replay_bck.setInteractive();
+    replay_fwd.setInteractive();
+
+    replay_play.setFrame(0);
+  }
+}
+
 function SetupReplayBoard(rboard_type,rboard_seed){
 
   //setup visuals
-    //here
+  ReplayPanel(1);
 
 	PlayAudio2(6);
 
@@ -1385,9 +1518,15 @@ function SetupReplayBoard(rboard_type,rboard_seed){
 	if(rboard_type=='q'){
     board_type='q';
 		replay_length=replay_daily_first.length-1;//amount if steps in a replay
+    replay_play.y=1062;
+    replay_bck.y=1062;
+    replay_fwd.y=1062;
 	}else{
     board_type='f';
 		replay_length=replay_weekly_first.length-1;//amount if steps in a replay
+    replay_play.y=990;
+    replay_bck.y=990;
+    replay_fwd.y=990;
 	}
 
   CreateReplayLevel();
@@ -1421,26 +1560,16 @@ function RunReplaySimulation(){
 						if(current_rboard_type=='q'){
               var first = block[replay_daily_first[current_move]];
               var second = block[replay_daily_second[current_move]];
-
-              var white_block_first=PhaserContext.add.image(0,0,"white_block_border_100");
-              white_block_first.visible=false;
-              var white_block_second=PhaserContext.add.image(0,0,"white_block_border_100");
-              white_block_second.visible=false;
 						}else{
               var first = block[replay_weekly_first[current_move]];
               var second = block[replay_weekly_second[current_move]];
-
-              var white_block_first=PhaserContext.add.image(0,0,"white_block_border_68");
-              white_block_first.visible=false;
-              var white_block_second=PhaserContext.add.image(0,0,"white_block_border_68");
-              white_block_second.visible=false;
 						}
 
 
 			switch(stage){
 
 				case 0:
-					$(first).css("border","1px solid #fff");
+          first.setFrame(30);
 					PlayAudio2(6);
 					stage++;
 					//so that if there is a "doublelick", we skip stage 1
@@ -1448,7 +1577,7 @@ function RunReplaySimulation(){
 				break;
 
 				case 1:
-					$(second).css("border","1px solid #fff");
+          second.setFrame(30);
 					PlayAudio2(6);
 					stage++;
 				break;
@@ -1462,13 +1591,13 @@ function RunReplaySimulation(){
 
 						//working the PLAY button
 						replay_is_active=0;
-						ReplayButtonState(replay_is_active);
+						replay_play.setFrame(0);
 						//reset the step by step stage
 						replay_stage=0;
 					}
 
-					$(first).css("border","1px solid #777");
-					$(second).css("border","1px solid #777");
+          //first.setFrame(first.block_value-1);
+          //second.setFrame(second.block_value-1);
 					if(total_blocks==1){BlockDoubleclick(first);PlayAudio2(9);}
 					else{BlockDrop(first,second);}
 
@@ -1482,23 +1611,26 @@ function RunReplaySimulation(){
 
 function RunReplayStep(){
 
+    var block_num = blockNumGroup.getChildren();
+    var block = blockGroup.getChildren();
+
 		//a correction, just in case current_move is less than 1
 		if(current_move<=0){current_move=1;}
 
-						//creating objects out of data-keys
-						if(current_rboard_type=='q'){
-							var first = $('*[data-key="'+replay_daily_first[current_move]+'"]');
-							var second = $('*[data-key="'+replay_daily_second[current_move]+'"]');
-						}else{
-							var first = $('*[data-key="'+replay_weekly_first[current_move]+'"]');
-							var second = $('*[data-key="'+replay_weekly_second[current_move]+'"]');
-						}
+
+            if(current_rboard_type=='q'){
+              var first = block[replay_daily_first[current_move]];
+              var second = block[replay_daily_second[current_move]];
+            }else{
+              var first = block[replay_weekly_first[current_move]];
+              var second = block[replay_weekly_second[current_move]];
+            }
 
 
 				switch(replay_stage){
 
 					case 0:
-						$(first).css("border","1px solid #fff");
+						first.setFrame(30);
 						PlayAudio2(6);
 						replay_stage++;
 						//so that if there is a "doublelick", we skip stage 1
@@ -1506,15 +1638,15 @@ function RunReplayStep(){
 					break;
 
 					case 1:
-						$(second).css("border","1px solid #fff");
+						second.setFrame(30);
 						PlayAudio2(6);
 						replay_stage++;
 					break;
 
 					case 2:
 
-						$(first).css("border","1px solid #777");
-						$(second).css("border","1px solid #777");
+            //first.setFrame(first.block_value-1);
+            //second.setFrame(second.block_value-1);
 						if(total_blocks==1){BlockDoubleclick(first);PlayAudio2(9);}
 						else{BlockDrop(first,second);}
 

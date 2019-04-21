@@ -3,7 +3,7 @@
 /*
 *
 *
-* Getting yesterday's board solution (currently no weekly board solutions)
+* Getting yesterday's board solutions
 *
 *
 */
@@ -27,7 +27,6 @@ if($current_week<0) {$current_week=52; $year=$year-1;}
 
 //YESTERDAY'S BOARD
 
-//for now fixed board type
 $board_type=1;
 
 //getting the seed o the daily board
@@ -49,7 +48,6 @@ if( $selectQuery = dbGetData ( $dbLink,'SELECT seed FROM periodicals WHERE date=
 
 //PREVIOUS WEEK'S BOARD
 
-//for now fixed board type
 $board_type=2;
 
 //getting the seed o the daily board
