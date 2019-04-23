@@ -20,6 +20,7 @@ var blockGroup=[];
 
 var is_there_board=0;//is the board populated
 var init_seed;//if a seed is sent
+var init_board_type;//if a board type is sent
 var board_type='q';//board type: quick or full
 
 var index=0;
@@ -27,6 +28,7 @@ var burn=0;//burn (how much score was lost when melding)
 var min_burn=0;//minimum burn
 //to know that the server has recorded min_burn. By default this is 1, since if there is already a score or no score, no verification is needed
 var min_burn_server_verified=1;
+var compare_score_verified=1;
 var prev_seed;//this is so that we know that the min_burn belongs to the same board, otherwise we reset it
 var total_blocks=99;//amount of blocks left in play
 var endgame=0;//end game phase can happen either at block amount=10 or 9 and endgame flag prevents a double trigger of endgame phase
@@ -75,6 +77,7 @@ var win_image;
 var replay_play;
 var replay_bck;
 var replay_fwd;
+var ajax_loader;
 
 
 
@@ -82,6 +85,24 @@ var replay_fwd;
 var color_scheme;
 var color_scheme_num;
 
+//getting url parameters (if any)
+var urlParams;
+(window.onpopstate = function () {
+  var match,
+    pl     = /\+/g,  // Regex for replacing addition symbol with a space
+    search = /([^&=]+)=?([^&]*)/g,
+    decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+    query  = window.location.search.substring(1);
+
+  urlParams = {};
+  while (match = search.exec(query))
+     urlParams[decode(match[1])] = decode(match[2]);
+})();
+
+if(urlParams["seed"]){
+    init_seed=urlParams["seed"];
+    init_board_type=urlParams["board"];
+}
 
 window.onload = function() {
     var gameConfig = {
@@ -128,6 +149,8 @@ var preloadAssets = new Phaser.Class({
       this.load.image("rules_button", "assets/img/rules.png");
       this.load.image("top_panel_border_100", "assets/img/top_panel_border_100.png");
 
+      this.load.image("close_button", "assets/img/close_button.png")
+
       this.load.spritesheet("standard_menu_buttons", "assets/img/standard_menu_buttons.png", {
           frameWidth: 556,
           frameHeight: 68
@@ -155,8 +178,10 @@ var preloadAssets = new Phaser.Class({
           frameHeight: 44
       });
 
-
-
+      this.load.spritesheet("ajax_loader", "assets/img/ajax_loader.png", {
+          frameWidth: 32,
+          frameHeight: 32
+      });
 
 
       this.load.audio('sfx','assets/snd/main_compressed_LAME192kbps.mp3');
@@ -170,13 +195,12 @@ var preloadAssets = new Phaser.Class({
               }
           });
 
-
-
-        this.scene.launch("showMenu");
         this.scene.launch("gameOver");
         this.scene.sleep("gameOver");
         this.scene.launch("playGame");
         this.scene.sleep("playGame");
+
+        this.scene.launch("showMenu");
 
         this.scene.remove();
 
@@ -228,6 +252,19 @@ var showMenu = new Phaser.Class({
         replay_weekly_button.setFrame(0);
         replay_weekly_button.object_type='replay_weekly_button';
         this.add.text(this.game.renderer.width / 2, 840,'Last Week\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+
+        var close_button=this.add.image(this.game.renderer.width / 2, 1070, "close_button").setInteractive();
+        close_button.object_type='close_button';
+
+        if(init_seed && init_board_type){
+          board_seed=init_seed;
+          board_type=init_board_type;
+          init_seed=0;
+          init_board_type=0;
+          CreateLevel();
+          this.scene.switch("playGame");
+        }
+
 
         //getting the daily and weekly board
         ServerReadPeriodical();
@@ -288,6 +325,16 @@ var showMenu = new Phaser.Class({
             	current_rboard_type='f';
             	SetupReplayBoard(current_rboard_type,current_rboard_seed);
               this.scene.switch("playGame");
+          }else if(gameObject.object_type=='close_button'){
+
+                    if(is_there_board==0){//if no board has been generated, we just go to Daily
+                      board_seed=board_seed_daily;
+                      board_type='q';
+                      CreateLevel();
+                    }
+
+                    PlayAudio2(6);
+                    this.scene.switch("playGame");
           }
 
           },this);
@@ -367,6 +414,7 @@ var playGame = new Phaser.Class({
 
         //debug=this.add.text(10,10,'', { fill: '#00ff00' });
 
+
         blocks_left_text=this.add.text(40,82,'Blocks left: 99', { fontFamily:'Ubuntu', fontSize: '25pt', color: '#e8a015' });
         blocks_left_text.setOrigin(0);
 
@@ -394,18 +442,18 @@ var playGame = new Phaser.Class({
 
 
 
-        replay_bck=this.add.image(431,1062,"replay_bck").setInteractive().setInteractive(false);
+        replay_bck=this.add.image(330,1062,"replay_bck").setInteractive().setInteractive(false);
         replay_bck.setOrigin(0);
         replay_bck.alpha=0;
         replay_bck.object_type='replay_bck';
 
-        replay_play=this.add.image(531,1062,"replay_play").setInteractive().setInteractive(false);
+        replay_play=this.add.image(480,1062,"replay_play").setInteractive().setInteractive(false);
         replay_play.setFrame(0);
         replay_play.setOrigin(0);
         replay_play.alpha=0;
         replay_play.object_type='replay_play';
 
-        replay_fwd=this.add.image(631,1062,"replay_fwd").setInteractive().setInteractive(false);
+        replay_fwd=this.add.image(630,1062,"replay_fwd").setInteractive().setInteractive(false);
         replay_fwd.setOrigin(0);
         replay_fwd.alpha=0;
         replay_fwd.object_type='replay_fwd';
@@ -413,7 +461,12 @@ var playGame = new Phaser.Class({
 
         border = this.add.image(360,601,"border_68");
 
-
+        this.anims.create({
+            key: "loader",
+            frames: this.anims.generateFrameNumbers('ajax_loader', { start: 0, end: 11 }),
+            frameRate: 10,
+            repeat: -1
+        });
 
 
     this.input.on('gameobjectdown', function(pointer,gameObject){
@@ -446,8 +499,10 @@ var playGame = new Phaser.Class({
               }
         }else if(gameObject.object_type=='menu_button'){
 
+                  //resetting replay stuff
                   clearInterval(replay_interval);
                   replay_is_active=0;
+                  replay_stage=0;
                   replay_play.setFrame(0);
 
                   //otherwise a reload level might create a bug, since firstblk will then no longer exist
@@ -459,11 +514,11 @@ var playGame = new Phaser.Class({
 
                             //colorize actively selected board
                             if(board_type=="q"){
-                              //$('#daily_button').attr('class','button_menu_highlight');
-                              //$('#weekly_button').attr('class','button_menu');
+                              daily_button.setFrame(1);
+                              weekly_button.setFrame(0);
                             }else{
-                              //$('#daily_button').attr('class','button_menu');
-                              //$('#weekly_button').attr('class','button_menu_highlight');
+                              daily_button.setFrame(0);
+                              weekly_button.setFrame(1);
                             }
 
           }
@@ -475,11 +530,26 @@ var playGame = new Phaser.Class({
           prevblk=gameObject;
           BlockDoubleclick(firstblk);
         }else if(gameObject.object_type=='replay_bck'){
-          if(replay_is_active==0 && current_move>1){
-        		Undo();
-        		replay_stage=0;//doing undo resets the replay_stage of the forward button, since now we have to start the next move all over
-        		//$(".numblock").css("border","1px solid #777");
-        		//$(".numblock").off();
+                if(replay_is_active==0 && current_move>1){
+                  var block = blockGroup.getChildren();
+
+                  //accessing the two necessary blocks and adding border images
+      						if(current_rboard_type=='q'){
+                    var first = block[replay_daily_first[current_move]];
+                    var second = block[replay_daily_second[current_move]];
+      						}else{
+                    var first = block[replay_weekly_first[current_move]];
+                    var second = block[replay_weekly_second[current_move]];
+      						}
+                  if(total_blocks>0){//this is to make sure that we are not trying to access non-existing blocks at the very end of the game
+                    var endgamecolorsaddition=0;//to make sure we color correctly during the endgame phase
+                    if(endgame==1){endgamecolorsaddition=15;}
+                    first.setFrame(first.block_value-1+endgamecolorsaddition);
+                    if(total_blocks>1){second.setFrame(second.block_value-1+endgamecolorsaddition);}
+                  }
+              		Undo();
+
+              		replay_stage=0;//doing undo resets the replay_stage of the forward button, since now we have to start the next move all over
         	}
         }else if(gameObject.object_type=='replay_fwd'){
             if(replay_is_active==0 && current_move<=replay_length){
@@ -487,7 +557,6 @@ var playGame = new Phaser.Class({
             }
         }else if(gameObject.object_type=='replay_play'){
 
-              var block_num = blockNumGroup.getChildren();
               var block = blockGroup.getChildren();
 
               if(replay_is_active==0){
@@ -574,7 +643,7 @@ function gameover_on(){
 	}
 
 	//setting win image and message
-	if(burn<min_burn || min_burn==0){
+	if(burn<min_burn){//not sure we need min_burn==0 here, since by default min_burn is 999
 		//image
     win_image.setFrame(0);
 		//message
@@ -582,6 +651,9 @@ function gameover_on(){
     board_complete_text2.setText('for this board!');
     board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
     board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+    board_complete_text1.setColor("#3b8adb");
+    board_complete_text2.setColor("#3b8adb");
+
 		//score info
     final_score_text.setText("New minimum is now "+burn+"!");
 		//advice
@@ -589,6 +661,12 @@ function gameover_on(){
     advice_text2.setText('within your score');
     advice_text1.x=PhaserContext.game.renderer.width / 2;
     advice_text2.x=PhaserContext.game.renderer.width / 2;
+    if(compare_score_verified==0){
+      advice_text1.setText('There seems to be no Internet connection,');
+      advice_text2.setText('so we might not be able to verify the record');
+      advice_text1.x=PhaserContext.game.renderer.width / 2;
+      advice_text2.x=PhaserContext.game.renderer.width / 2;
+    }
 
 		//sending new min_burn to the server
 		min_burn=burn;
@@ -604,6 +682,8 @@ function gameover_on(){
     board_complete_text2.setText('');
     board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
     board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+    board_complete_text1.setColor("#3b8adb");
+    board_complete_text2.setColor("#3b8adb");
 		//score info
     final_score_text.setText("You got "+burn+"/"+min_burn+"!");
     final_score_text.x=PhaserContext.game.renderer.width / 2;
@@ -622,6 +702,8 @@ function gameover_on(){
     board_complete_text2.setText('');
     board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
     board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+    board_complete_text1.setColor("#cc4239");
+    board_complete_text2.setColor("#cc4239");
 		//score info
     final_score_text.setText("You got "+burn+"/"+min_burn);
     final_score_text.x=PhaserContext.game.renderer.width / 2;
@@ -633,6 +715,8 @@ function gameover_on(){
       board_complete_text2.setText('');
       board_complete_text1.x=PhaserContext.game.renderer.width / 2;//centering text
       board_complete_text2.x=PhaserContext.game.renderer.width / 2;
+      board_complete_text1.setColor("#fec14c");
+      board_complete_text2.setColor("#fec14c");
 
       advice_text1.setText("Just " + (burn-min_burn) + " away");
       advice_text2.setText('from the current world record!');
@@ -697,7 +781,7 @@ function CreateLevel(){
 	current_move=0;
 	undo_button.setFrame(1);
 	burn=0;//resetting burn
-	//UpdateScore();
+	UpdateScore();
 	undo_id_one=[];//resetting id history
 	undo_id_two=[];
 
@@ -715,7 +799,7 @@ function CreateLevel(){
               yourbestscore_position(your_daily_best[1]);
             }
         }else{
-            your_best_text.setText('Board seed: <a class="sand" href="?seed='+board_seed+'&board=q">'+board_seed+'</a>');
+            your_best_text.setText('');
         }
   }else{
     total_blocks=99;
@@ -728,7 +812,7 @@ function CreateLevel(){
         if(your_weekly_best[1]==999){your_best_text.setText("");}
         else{your_best_text.setText("Your best on this board: "+your_weekly_best[1]);yourbestscore_position(your_weekly_best[1]);}
       }else{
-        your_best_text.setText('Board seed: <a class="sand" href="?seed='+board_seed+'&board=q">'+board_seed+'</a>');
+        your_best_text.setText('');
       }
   }
 
@@ -1070,8 +1154,8 @@ function Undo(){
 
   var block_num = blockNumGroup.getChildren();
   var block = blockGroup.getChildren();
+
   var id_one = block[undo_id_one[current_move]].block_id;
-  var id_two = block[undo_id_two[current_move]].block_id;
 
 
 	if(undo_type[current_move]==1){//undo when combining
@@ -1095,6 +1179,12 @@ function Undo(){
       //UNDO SECOND BLOCK
       RestoreBlock(undo_id_two[current_move],undo_two[current_move]);
 
+      undo_id_one.pop();
+      undo_id_two.pop();
+      undo_one.pop();
+      undo_two.pop();
+      undo_type.pop();
+
 	}//undo when combining
 	else if(undo_type[current_move]==2){//undo when doubleclick
 
@@ -1110,7 +1200,7 @@ function Undo(){
     }//undo when doubleclick
 
 
-    	undo_type[current_move]=0;
+    	//undo_type[current_move]=0;
     	//this is an additional check, although the UNDO button should not
     	//call this function if current_move is not more than 0
     	if(current_move>0){current_move--;}
@@ -1120,7 +1210,7 @@ function Undo(){
 
       //resetting the color of the currently clicked block
       block_num[id_one].setColor("#000");
-      if(firstblk){block_num[firstblk.block_id].setColor("#000");}//working the case when a player clicks a block, then undos a move; in this case a clicked block's number sign should also be reset to the correct color
+      if(firstblk){block_num[firstblk.block_id].setColor("#000");}//working the case when a player clicks a block, then undoes a move; in this case a clicked block's number sign should also be reset to the correct color
     	firstblk='';//resetting click
     	prevblk='';//variables
 
@@ -1143,10 +1233,11 @@ function TotalBlocks(amount){
 
 			if(board_seed>0){
 				current_move=0;
-				//first get the score from the server
-				ServerCompareScore();
+    				//first get the score from the server
+            ajax_loader = PhaserContext.add.sprite(this.game.renderer.width / 2,this.game.renderer.height / 2,"ajax_loader").play("loader");
+    				ServerCompareScore();
 			}else{
-				//here nothing is happening, because during replay we don't want to show the gameover screen
+				//here nothing is happening, because during replay we don't want to show the gameover screen and we are not resetting the current_move
 			}
 
 		}
@@ -1284,20 +1375,34 @@ function ServerReadScore(){
 
   xhttp.onreadystatechange = function() {
 
-      if (this.readyState == 4 && this.status == 200) {
-        if (!this.responseText){
-          min_burn=999;
+      if (this.readyState == 4) {
+
+        if(this.status == 200){
+            if (!this.responseText){
+            min_burn=999;
+            }else{
+              min_burn=this.responseText;
+            }
+
+            if(board_type=='q'){
+              localStorage.setItem('daily_min_burn', min_burn);
+            }else {
+              localStorage.setItem('weekly_min_burn', min_burn);
+            }
+            UpdateScore();
         }else{
-          min_burn=this.responseText;
+          if(board_type=='q'){
+            min_burn=parseInt(localStorage.getItem('daily_min_burn'));
+          }else {
+            min_burn=parseInt(localStorage.getItem('weekly_min_burn'));
+          }
+          UpdateScore();
         }
 
-        if(board_type=='q'){
-          localStorage.setItem('daily_min_burn', min_burn);
-        }else {
-          localStorage.setItem('weekly_min_burn', min_burn);
+
+
         }
-        UpdateScore();
-        }
+
      }
 
 
@@ -1306,8 +1411,7 @@ function ServerReadScore(){
 //compare the client's score with what's currently on the server
 function ServerCompareScore(){
 
-	//ajax-loader
-	//$("#gameover").prepend('<div style="width:297px;height:17px;margin:auto;text-align:center;" id="loader"><img src="img/ajax-loader.gif" style="margin:auto;display:block;top: 0px;left: 0px;right: 0px;bottom:0px;position: absolute;" /></div>');
+  compare_score_verified=0;
 
   var xhttp = new XMLHttpRequest();
 
@@ -1318,15 +1422,23 @@ function ServerCompareScore(){
 
   xhttp.onreadystatechange = function() {
 
-      if (this.readyState == 4 && this.status == 200) {
-        //if there is no data, we'll rely on the client for smooth experience. the probability that the score will constantly be changing would be low for the vast majority of the time
-        if (!this.responseText){
+      if (this.readyState == 4) {
+        if(this.status == 200){
+              compare_score_verified=1;
+              ajax_loader.destroy();
+              //this is a case when no min_burn exists yet
+              if (!this.responseText){
+                gameover_on();
+              }
+              else{
+                min_burn=this.responseText;
+                gameover_on();
+              }
+        }else{//the case of an error or, most usually, no Internet connection. compare_score_verified is not set to 1
+          ajax_loader.destroy();
           gameover_on();
         }
-        else{
-          min_burn=this.responseText;
-          gameover_on();
-        }
+
       }
 
 
@@ -1540,7 +1652,6 @@ function SetupReplayBoard(rboard_type,rboard_seed){
 
 function RunReplaySimulation(){
 
-  var block_num = blockNumGroup.getChildren();
   var block = blockGroup.getChildren();
 
 	var stage=0;//which stage of the replay are we: selecting first block, selecting second block, or executing a move
@@ -1611,7 +1722,6 @@ function RunReplaySimulation(){
 
 function RunReplayStep(){
 
-    var block_num = blockNumGroup.getChildren();
     var block = blockGroup.getChildren();
 
 		//a correction, just in case current_move is less than 1

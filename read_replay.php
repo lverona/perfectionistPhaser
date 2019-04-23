@@ -3,7 +3,7 @@
 /*
 *
 *
-* Getting yesterday's board solutions
+* Getting yesterday's and last week solutions
 *
 *
 */

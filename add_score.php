@@ -8,18 +8,18 @@
 //$num = floor( (mt_rand() / (mt_getrandmax() + 1) ) *15 );
 
 $debug=0;
-//error_reporting(0);
+error_reporting(0);
 require_once('mfunctions.php');
 
 if($debug>0){
 
-$_POST['board_seed']=939220089;
-$_POST['board_type']='q';
-$_POST['lost']=42;
+$_POST['board_seed']=1885930846;
+$_POST['board_type']='f';
+$_POST['lost']=43;
 
-$_POST['undo_id_one'] = array('',0,32,33,39,26,25,23,18,13,7,14,12,8,34,35,30,36,42,10,16,21,5,4,3,9,2,29,17,44,46,11);
+$_POST['undo_id_one'] = '["","58","32","59","76","49","75","79","80","74","83","56","57","86","87","67","64","85","39","31","12","11","13","9","19","28","55","46","88","97","15","7","25","4","23","22","37","27","29","47","36","18","17","52","51","44","35","62","71","45","92","94","33","69","81","77","78","95","90","34","98","3"]';
 
-$_POST['undo_id_two'] = array('',1,33,31,26,38,27,18,19,37,7,12,15,20,35,30,24,42,6,16,21,22,4,28,9,45,2,29,44,41,11);
+$_POST['undo_id_two'] = '["","32","41","49","49","48","66","74","74","73","65","57","84","87","96","64","63","40","42","30","11","13","14","19","10","1","60","82","81","70","16","25","26","23","5","24","38","29","38","20","43","21","52","61","53","62","62","54","8","92","93","91","69","68","72","78","6","2","50","89","3","0"]';
 
 }
 
@@ -120,14 +120,14 @@ function ReplayBoard($board_seed,$rows,$columns,$undo_id_one,$undo_id_two,$lost,
 
       $value = floor( (mt_rand() / (mt_getrandmax() + 1) ) *15 );
 
-            //echo '&nbsp;-'.($value+1).'-&nbsp;';
+            echo '&nbsp;-'.($value+1).'-&nbsp;';
             $block_values[$i]=$value+1;
             $block_ids[$i]=$i;
             $i++;
 
           }//x
 
-          //echo '<br>';
+          echo '<br>';
 
       }//y
 
@@ -224,13 +224,15 @@ function ReplayBoard($board_seed,$rows,$columns,$undo_id_one,$undo_id_two,$lost,
 
 				}
 
-        if ($debug>0) echo $one.'-'.$two.'<br>';
+        if ($debug>0) echo $id_one.'_'.$one.' - '.$id_two.'_'.$two.' === Lost: '.$burn.', <u>Total blocks: '.$total_blocks.'</u><br>';
 
       }//game loop end
 
       if ($debug>0) echo '<u>Total blocks: '.$total_blocks.'</u><br>';
 
-      if ($debug>0) echo '<br>Lost: '.$burn.'<br>';
+      if ($debug>0){
+        echo '<br>Reported lost: '.$lost.', Simulated Lost: '.$burn.'<br>';
+      }
       if($burn!=$lost){
         if ($debug>1) echo '<b>Error</b>: Replay lost score doesn\'t match.';
         exit();
@@ -240,7 +242,7 @@ function ReplayBoard($board_seed,$rows,$columns,$undo_id_one,$undo_id_two,$lost,
 
       if ($debug>1) echo '<b>Pass</b>: No illegal moves.<br>';
 
-      if($total_blocks>0){
+      if($total_blocks!=0){
         if ($debug>1) echo '<b>Error</b>: Total blocks are not 0.<br>';
         exit();
       }else{
