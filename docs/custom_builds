@@ -1,0 +1,24 @@
+https://github.com/photonstorm/phaser3-custom-build
+
+npm install
+
+npm audit fix
+
+
+
+
+Replace phaser-custom.js with phaser-full.js
+
+npm list phaser - version of phaser
+
+npm update phaser - update to the latest version
+
+npm run build - for custom build
+
+npm run buildcore and buildfull
+
+
+To exclude unnecessary file types
+phaser3-custom-build-master/node_modules/phaser/src/loader/filetypes/
+Game objects
+phaser3-custom-build-master/node_modules/phaser/src/gameobjects/

@@ -1,0 +1,7 @@
+the event flow is pointerdown (on the sprite itself), gameobjectdown (from the input plugin) and then pointerdown (from the input plugin)
+the event is sent to all 3 handlers
+if you stop it at any one, it gets no further
+sprite.on('pointerdown', (pointer, x, y, event) => { event.stopPropagation(); }) = the other 2 handlers never get fired
+this.input.on('gameobjectdown', (pointer, gameobjects, event) => { // do stuff and then event.stopPropagation(); }) = it never gets sent to this.input.on('pointerdown')
+Source:
+https://photonstorm.github.io/phaser3-docs/Phaser.Input.Events.html#event:GAMEOBJECT_DOWN

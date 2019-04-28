@@ -1,0 +1,139 @@
+Reducing Phaser's Filesize: Custom Phaser Builds.
+
+For those of us who are definitely not using all parts of Phaser, it might be prudent to reduce the file size of the production library. The current minified file size is around 880kb. This is quite a lot.
+
+The good news is that there is a way to throw out modules you are not using in your game, and this tutorial is going to walk you through the process.
+
+While DevBlog 127 already has a good tutorial on how to do that, this tutorial is designed to be even more explicit, step by step instructions for people who generally know how to script games, but haven't worked much with npm and/or webpack and just need a clear explanation of what to do, without the added baggage of learning a technology they would otherwise not need.
+
+Carefully and patiently go through this tutorial once - and you will get a good understanding of custom builds, and at the same time learn a bit about Phaser's source code, which is actually very organized and not scary at all. And be sure to bookmark this tutorial for future reference, details get forgotten fairly quickly.
+
+Final thing to note is that I am using a desktop Linux system. Everything should be identical for Windows and Mac OS users, but just in case it's not, do reach out.
+
+Prerequisites.
+
+You will need npm, which is a javascript pakage manager. No matter which system you are on, installing npm is not difficult.
+
+You will also need to use the command line, so grab your favorite terminal emulator. Don't worry, there is nothing advanced there at all, and I will walk you through all the necessary commands.
+
+Let's go!
+
+Step 1. Clone or download a special repo.
+
+This is a repo that Photonstorm (Phaser's author) has provided which is basically a template for building phaser with webpack. You don't need to know anything about webpack in order to follow this process.
+
+https://github.com/photonstorm/phaser3-custom-build
+
+Clone the repo, or if you don't know how to use git, just grab the zip archive of the whole thing and unzip it anywhere on your computer.
+
+Do not worry if by the time you get there, the repo looks dated. It is simply a config and does not require much updates. We will pull the latest version of Phaser using this setup.
+
+Step 2. Initial setup.
+
+Here we will setup the build environment and make sure we are using the latest Phaser version. This is a very straightforward process which involves just 2-3 commands through the command line.
+
+Once you unzip the archive, you will get a phaser3-custom-build-master folder. Navigate to this folder using the command line.
+
+Now run this command:
+
+2.1 npm install
+
+Sometimes after running this you will get a dependency error. The message will actually explain that in order to fix it you need to run
+
+npm audit fix
+
+In my case this fixed the issue, and I could proceed.
+
+
+How let's check Phaser version shipped with the repo.
+
+2.2 npm list phaser
+
+This gives you the version of Phaser included. If it is not the latest, we update Phaser by running this command:
+
+2.3 npm update phaser
+
+That's it. You are now ready to move forward with building Phaser!
+
+
+
+Step 3. Building the full version of Phaser.
+
+What you now have is a system which takes Phaser's source code and builds the final .js library.
+
+The root directory has a bunch of .js files. We will only focus on files which start with "phaser", like phaser-custom.js.
+
+What these files are, are instructions which tell webpack which parts of Phaser to include in the build. Photonstorm has prepared several presets for us to build upon.
+
+In order to build these various version of phaser, you would need to run a command which would look like:
+npm run [ALIAS]
+
+The [ALIAS] part depends on which version you would like to build. So, in order to build the full version of Phaser, with all the modules included, you would need to run
+
+npm run buildfull
+
+If you would like to build just Phaser Core, you would run
+
+npm run buildcore
+
+You can see the list of these aliases in a file called "package.json".
+
+What you want to do at this point is to build the full version of Phaser and check if your game works fine. So, do
+
+npm run buildfull
+
+This will put the newly built Phaser files into the "dist" folder. Do not worry about cleaning it out each time, the commands takes care of it automatically, by first deleting the whole "dist" folder and then replacing it with a new one.
+
+Once you navigate to the folder, you will see typically three files: a full version, with comments and everything, a minified version, and a map file.
+
+What you need to do is take the minified version and copy it to your game folder. Link to it, replacing the standard phaser library and see if your game works.
+
+If not - you will have to investigate and probably hit the Discord channel for some help. But if your game using the same version of Phaser that we have here, then the resulting library should be identical to the one you got from the Phaser website.
+
+
+
+Step 4. Building a custom version of Phaser.
+
+Assuming the full version works, we will now move on to build a custom version.
+
+The idea is this: we take the full version of Phaser, and start stripping off modules we might not need. We then copy the modified version of Phaser into our game and make sure the game works. If we have removed a module that is required by the game, the game will not load and throw an error in the Developer Tools console. In this case we add the module back.
+
+
+In order to start doing that, open the "phaser-full.js" file. It is the config file for the full build we just did. Copy the contents of this file.
+
+Then open the file called "phaser-custom.js". Delete all of its contents and paste the contents from "phaser-full.js".
+
+This means that your custom build will at the moment be identical to the full Phaser library.
+
+From now on your build will be using "phaser-custom.js" as its config file, and the command you will be using to build is:
+
+npm run build
+
+In this case "build" is an alias for the config you have in "phaser-custom.js".
+
+So now in your "phaser-custom.js" locate a var Phaser object. What it lists are modules. You delete a module by simply removing one of the elements.
+
+For instance, let's say your game is a 2D puzzle game which does not use any physics, gravity, etc. That means you can safely remove the Physics: require('physics') element from the Phaser object.
+
+I would recommend removing objects one by one, so that it is easier to understand which object needs to be returned if your game complains. But it is ok to remove several obvious things in bulk. If your game does not draw shapes, doesn't use physics, DOM and tweens, it is quite safe to remove DOM, Geom, Physics and Tweens.
+
+Either way, at this point the process is very straightforward, albeit a tad tedious.
+
+
+
+Step 5. Cleaning out Loader and GameObjects.
+
+Two modules you will probably always need are Loader and GameObjects (otherwise, why use Phaser?)
+
+However, frequently you won't need all filetypes or even most filetypes, as well as not all games would require most game objects.
+
+In both of these cases we should specify which things we want to keep and list them explicitly.
+
+5.1 Let's start with GameObjects.
+
+How do we know which Game Objects exist in the first place? This is where the source code comes in.
+
+Navigate to phaser3-custom-build-master/node_modules/phaser/src/gameobjects/
+
+Each folder is a GameObject. Now you can see them all!
+

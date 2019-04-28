@@ -1,15 +1,8 @@
 Fixes.
-1. Gameover screen - remember to color signs appropriately
-6. Create a Close Menu button
-7. Add color schemes
-8. Make the whole thing centered when the full board is on. Right now it is skewed towards the top
-9. since I now have block.block_value, see if I can simplify code
-10. RestoreBlocks has "value_id" as input, but really, it seems simply value. Re-check.
-11. Make replay buttons more spread.
-12. Weekly board replay featured a -2 Total Blocks in the very end, as if a separate move
-13. Currently due to the fact that the board seed is the primary key, there cannot be both q and f boards with the same board seed. Maybe this is ok.
-14. In the script generating periodicals there is no workaround in case of a board_seed collussion. If the newly generated board seed already exists, it will simply not get added.
-15. Add the loader and error xhttp stuff, so that if there is no Internet, it just reloads the board.
-16. If there is no replay - the app will just fail. Need a workaround, or rather a check that there is a replay. If not, somehow make that clear.
-17. Rules.
-18. Create a mechanism which will save the replay and maybe retry re-uploading it when Internet comes back. But this is a power feature, definitely not essential.
+
+1. Add color schemes
+3. since I now have block.block_value, see if I can simplify code
+4. RestoreBlocks has "value_id" as input, but really, it seems simply value. Re-check.
+6. If there is no replay - the app will just fail. Need a workaround, or rather a check that there is a replay. If not, somehow make that clear.
+8. Create a mechanism which will save the replay and maybe retry re-uploading it when Internet comes back. But this is a power feature, definitely not essential.
+9. Add the ability to play Yesterday's board.

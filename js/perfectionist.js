@@ -78,6 +78,7 @@ var replay_play;
 var replay_bck;
 var replay_fwd;
 var ajax_loader;
+var playGame_offset=-10;//vertical offset of game objects
 
 
 
@@ -114,18 +115,20 @@ window.onload = function() {
         },
        backgroundColor: 0x222222,
        disableContextMenu: true,
-       scene: [preloadAssets, showMenu, gameOver, playGame]
+       scene: [preloadAssets, showMenu, gameOver, playGame, showRules]
    };
 
     game = new Phaser.Game(gameConfig);
     window.focus();
 }
 
+
+
 var preloadAssets = new Phaser.Class({
     Extends: Phaser.Scene,
     initialize:
     function preloadAssets(){
-        Phaser.Scene.call(this, {key: "PreloadAssets"});
+        Phaser.Scene.call(this, {key: "preloadAssets"});
     },
     preload: function(){
 
@@ -141,7 +144,7 @@ var preloadAssets = new Phaser.Class({
       });
       this.load.spritesheet("undo_button", "assets/img/undo.png", {
           frameWidth: 160,
-          frameHeight: 44
+          frameHeight: 62
       });
       this.load.image("border_100", "assets/img/border_100.png");
       this.load.image("border_68", "assets/img/border_68.png");
@@ -175,13 +178,26 @@ var preloadAssets = new Phaser.Class({
       this.load.image("replay_fwd", "assets/img/replay_fwd.png");
       this.load.spritesheet("replay_play", "assets/img/replay.png", {
           frameWidth: 58,
-          frameHeight: 44
+          frameHeight: 62
       });
 
       this.load.spritesheet("ajax_loader", "assets/img/ajax_loader.png", {
           frameWidth: 32,
           frameHeight: 32
       });
+
+      this.load.image("tutorial_image_1", "assets/img/tutorial_image_1.png");
+      this.load.image("tutorial_image_2", "assets/img/tutorial_image_2.png");
+      this.load.image("tutorial_image_3", "assets/img/tutorial_image_3.png");
+      this.load.image("tutorial_image_4", "assets/img/tutorial_image_4.png");
+      this.load.image("tutorial_image_5", "assets/img/tutorial_image_5.png");
+      this.load.image("tutorial_image_6", "assets/img/tutorial_image_6.png");
+      this.load.image("tutorial_image_7", "assets/img/tutorial_image_7.png");
+
+      this.load.image("tutorial_left_arrow", "assets/img/tutorial_left_arrow.png");
+      this.load.image("tutorial_right_arrow", "assets/img/tutorial_right_arrow.png");
+
+
 
 
       this.load.audio('sfx','assets/snd/main_compressed_LAME192kbps.mp3');
@@ -202,11 +218,93 @@ var preloadAssets = new Phaser.Class({
 
         this.scene.launch("showMenu");
 
+
         this.scene.remove();
 
     }
 })
 
+
+var showRules = new Phaser.Class({
+    Extends: Phaser.Scene,
+    initialize:
+    function showRules(){
+        Phaser.Scene.call(this, {key: "showRules"});
+    },
+    create: function(){
+
+        this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "gameover_background");
+
+        var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'How to play', { fontFamily:'Ubuntu', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold' });
+        title_text_1.setOrigin(0.5,0);
+
+        var upper_content= [
+          "Your goal is to remove all blocks from the board, and do it as efficiently as possible",
+          "\n",
+          "There are only 5 rules to the game",
+          "\n"
+        ];
+
+        tut_text_upper = this.add.text(this.game.renderer.width / 2, 150, upper_content, { fontFamily: 'Ubuntu', fontSize: '24pt', color: '#fff', wordWrap: { width: 700, useAdvancedWrap: true }, align: 'center', lineSpacing: 10 });
+        tut_text_upper.setOrigin(0.5,0);
+
+        tut_image = this.add.image(this.game.renderer.width / 2, 500, "tutorial_image_3");
+        tut_image.alpha=0;
+
+        var lower_content= [
+          ""
+        ];
+
+        tut_text_lower = this.add.text(this.game.renderer.width / 2, 680, lower_content, { fontFamily: 'Ubuntu', fontSize: '24pt', color: '#fff', wordWrap: { width: 700, useAdvancedWrap: true }, align: 'center', lineSpacing: 10 });
+        tut_text_lower.setOrigin(0.5,0);
+
+
+        var left_button = this.add.image(this.game.renderer.width / 2 - 150, 1000, "tutorial_left_arrow").setInteractive();
+        left_button.object_type='left_button';
+
+        var right_button = this.add.image(this.game.renderer.width / 2 + 150, 1000, "tutorial_right_arrow").setInteractive();
+        right_button.object_type='right_button';
+
+
+
+        this.input.on('gameobjectdown', function(pointer,gameObject){
+
+          //this.input.stopPropagation();
+
+          if(gameObject.object_type=='left_button'){
+
+            tutorial_page--;
+
+      			if(tutorial_page==0){//exiting from tutorial
+              tutorial_page=1;
+              this.scene.switch("playGame");
+            }else{
+              Tutorial(tutorial_page);
+            }
+
+            PlayAudio2(6);
+
+          }else if(gameObject.object_type=='right_button'){
+
+            tutorial_page++;
+
+            if(tutorial_page>9){//exiting from tutorial
+              tutorial_page=1;
+              this.scene.switch("playGame");
+            }else{
+              Tutorial(tutorial_page);
+            }
+            PlayAudio2(6);
+
+
+          }
+
+
+
+        },this);//input
+
+    }//create
+});
 
 var showMenu = new Phaser.Class({
     Extends: Phaser.Scene,
@@ -218,40 +316,40 @@ var showMenu = new Phaser.Class({
 
         this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "title_background");
 
-        var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'Louigi Verona\'s', { fontFamily:'Heebo', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold' });
+        var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'Louigi Verona\'s', { fontFamily:'Heebo', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 39, descent: 8, fontSize: 47} });
         title_text_1.setOrigin(0.5,0);
 
-        var title_text_2=this.add.text(this.game.renderer.width / 2, 55,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold' });
+        var title_text_2=this.add.text(this.game.renderer.width / 2, 55,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 82, descent: 19, fontSize: 101} });
         title_text_2.setOrigin(0.5,0);
 
-        today_sign=this.add.text(this.game.renderer.width / 2, 240,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold' });
+        today_sign=this.add.text(this.game.renderer.width / 2, 240,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
         today_sign.setOrigin(0.5,0);
 
         daily_button=this.add.image(this.game.renderer.width / 2, 312, "standard_menu_buttons").setInteractive();
         daily_button.setFrame(0);
         daily_button.object_type='daily_button';
-        daily_button_sign=this.add.text(this.game.renderer.width / 2, 312,'Daily Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        daily_button_sign=this.add.text(this.game.renderer.width / 2, 312,'Daily Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
 
 
-        week_sign=this.add.text(this.game.renderer.width / 2, 400,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold' });
+        week_sign=this.add.text(this.game.renderer.width / 2, 400,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
         week_sign.setOrigin(0.5,0);
 
         weekly_button=this.add.image(this.game.renderer.width / 2, 472, "standard_menu_buttons").setInteractive();
         weekly_button.setFrame(0);
         weekly_button.object_type='weekly_button';
-        this.add.text(this.game.renderer.width / 2, 472,'Weekly Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        this.add.text(this.game.renderer.width / 2, 472,'Weekly Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
 
-        this.add.text(this.game.renderer.width / 2, 650,'Solutions', { fontFamily:'Ubuntu', fontSize: '28pt', color: '#999999', fontStyle: 'bold' }).setOrigin(0.5,0);
+        this.add.text(this.game.renderer.width / 2, 650,'Solutions', { fontFamily:'Ubuntu', fontSize: '28pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 35, descent: 7, fontSize: 42} }).setOrigin(0.5,0);
 
         var replay_daily_button=this.add.image(this.game.renderer.width / 2, 742, "narrow_menu_buttons").setInteractive();
         replay_daily_button.setFrame(0);
         replay_daily_button.object_type='replay_daily_button';
-        this.add.text(this.game.renderer.width / 2, 742,'Yesterday\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        var yest = this.add.text(this.game.renderer.width / 2, 742,'Yesterday\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
 
         var replay_weekly_button=this.add.image(this.game.renderer.width / 2, 840, "narrow_menu_buttons").setInteractive();
         replay_weekly_button.setFrame(0);
         replay_weekly_button.object_type='replay_weekly_button';
-        this.add.text(this.game.renderer.width / 2, 840,'Last Week\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+        this.add.text(this.game.renderer.width / 2, 840,'Last Week\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
 
         var close_button=this.add.image(this.game.renderer.width / 2, 1070, "close_button").setInteractive();
         close_button.object_type='close_button';
@@ -276,6 +374,9 @@ var showMenu = new Phaser.Class({
           //this.input.stopPropagation();
 
           if(gameObject.object_type=='daily_button'){
+
+            //ajax_loader = this.add.sprite(this.game.renderer.width / 2,this.game.renderer.height / 2,"ajax_loader").play("loader").setDepth(1);
+
             //Friday Board
             if(board_seed_daily==-999){
               board_type='q';
@@ -354,13 +455,14 @@ var gameOver = new Phaser.Class({
 
       this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "gameover_background");
 
-      board_complete_text1 = this.add.text(this.game.renderer.width / 2, 70,'You set a world record', { fontFamily:'Ubuntu', fontSize: '34pt', color: '#3b8adb', fontStyle: 'bold' }).setOrigin(0.5,0);
-      board_complete_text2 = this.add.text(this.game.renderer.width / 2, 125,'for this board!', { fontFamily:'Ubuntu', fontSize: '34pt', color: '#3b8adb', fontStyle: 'bold' }).setOrigin(0.5,0);
+      board_complete_text1 = this.add.text(this.game.renderer.width / 2, 70,'You set a world record', { fontFamily:'Ubuntu', fontSize: '34pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 43, descent: 8, fontSize: 51} }).setOrigin(0.5,0);
+      board_complete_text2 = this.add.text(this.game.renderer.width / 2, 125,'for this board!', { fontFamily:'Ubuntu', fontSize: '34pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 43, descent: 8, fontSize: 51} }).setOrigin(0.5,0);
 
-      final_score_text = this.add.text(this.game.renderer.width / 2, 225,'You got 51/51', { fontFamily:'Ubuntu', fontSize: '28pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0);
 
-      advice_text1 = this.add.text(this.game.renderer.width / 2, 325,'All players will now have to stay', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999', fontStyle: 'bold' }).setOrigin(0.5,0);
-      advice_text2 = this.add.text(this.game.renderer.width / 2, 370,'within your score', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999', fontStyle: 'bold' }).setOrigin(0.5,0);
+      final_score_text = this.add.text(this.game.renderer.width / 2, 225,'You got 51/51', { fontFamily:'Ubuntu', fontSize: '28pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 35, descent: 7, fontSize: 42} }).setOrigin(0.5,0);
+
+      advice_text1 = this.add.text(this.game.renderer.width / 2, 325,'All players will now have to stay', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} }).setOrigin(0.5,0);
+      advice_text2 = this.add.text(this.game.renderer.width / 2, 370,'within your score', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} }).setOrigin(0.5,0);
 
       win_image = this.add.image(this.game.renderer.width / 2, 600, "win_images");
       win_image.setFrame(0);
@@ -369,12 +471,12 @@ var gameOver = new Phaser.Class({
       var play_again_button=this.add.image(this.game.renderer.width / 2, 832, "standard_menu_buttons").setInteractive();
       play_again_button.setFrame(1);
       play_again_button.object_type='play_same_board';
-      this.add.text(this.game.renderer.width / 2, 832,'Play Same Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+      this.add.text(this.game.renderer.width / 2, 832,'Play Same Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
 
       var goto_menu__button=this.add.image(this.game.renderer.width / 2, 932, "standard_menu_buttons").setInteractive();
       goto_menu__button.setFrame(0);
       goto_menu__button.object_type='goto_menu';
-      this.add.text(this.game.renderer.width / 2, 932,'Go To Menu', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5,0.5);
+      this.add.text(this.game.renderer.width / 2, 932,'Go To Menu', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
 
 
 
@@ -415,51 +517,51 @@ var playGame = new Phaser.Class({
         //debug=this.add.text(10,10,'', { fill: '#00ff00' });
 
 
-        blocks_left_text=this.add.text(40,82,'Blocks left: 99', { fontFamily:'Ubuntu', fontSize: '25pt', color: '#e8a015' });
+        blocks_left_text=this.add.text(40,82+playGame_offset,'Blocks left: 99', { fontFamily:'Ubuntu', fontSize: '25pt', color: '#e8a015', metrics:{ascent: 31, descent: 6, fontSize: 37} });
         blocks_left_text.setOrigin(0);
 
-        lost_text=this.add.text(553,82,'Lost: 0/?', { fontFamily:"'Ubuntu',serif", fontSize: '25pt', color: '#e8a015' });
+        lost_text=this.add.text(553,82+playGame_offset,'Lost: 0/?', { fontFamily:'Ubuntu', fontSize: '25pt', color: '#e8a015', metrics:{ascent: 31, descent: 6, fontSize: 37} });
         lost_text.setOrigin(0);
 
-        top_panel_border_100=this.add.image(15,66,"top_panel_border_100");
+        top_panel_border_100=this.add.image(15,66+playGame_offset,"top_panel_border_100");
         top_panel_border_100.setOrigin(0);//to use normal coordinates
 
-        your_best_text=this.add.text(309,24,'Your best on this board: ?', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#555', fontStyle: 'bold' });
+        your_best_text=this.add.text(309,24+playGame_offset,'Your best on this board: ?', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#555', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
         your_best_text.setOrigin(0);
 
-        rules_button=this.add.image(20,16,"rules_button").setInteractive();
+        rules_button=this.add.image(20,16+playGame_offset,"rules_button").setInteractive();
         rules_button.setOrigin(0);
         rules_button.object_type='rules_button';
 
-        menu_button=this.add.image(20,1062,"menu_button").setInteractive();
+        menu_button=this.add.image(20,1062+playGame_offset,"menu_button").setInteractive();
         menu_button.setOrigin(0);
         menu_button.object_type='menu_button';
 
-        undo_button=this.add.image(540,1062,"undo_button").setInteractive();
+        undo_button=this.add.image(540,1062+playGame_offset,"undo_button").setInteractive();
         undo_button.setFrame(1);
         undo_button.setOrigin(0);//to use normal coordinates
         undo_button.object_type='undo_button';
 
 
 
-        replay_bck=this.add.image(330,1062,"replay_bck").setInteractive().setInteractive(false);
+        replay_bck=this.add.image(330,1062+playGame_offset,"replay_bck").setInteractive().setInteractive(false);
         replay_bck.setOrigin(0);
         replay_bck.alpha=0;
         replay_bck.object_type='replay_bck';
 
-        replay_play=this.add.image(480,1062,"replay_play").setInteractive().setInteractive(false);
+        replay_play=this.add.image(480,1062+playGame_offset,"replay_play").setInteractive().setInteractive(false);
         replay_play.setFrame(0);
         replay_play.setOrigin(0);
         replay_play.alpha=0;
         replay_play.object_type='replay_play';
 
-        replay_fwd=this.add.image(630,1062,"replay_fwd").setInteractive().setInteractive(false);
+        replay_fwd=this.add.image(630,1062+playGame_offset,"replay_fwd").setInteractive().setInteractive(false);
         replay_fwd.setOrigin(0);
         replay_fwd.alpha=0;
         replay_fwd.object_type='replay_fwd';
 
 
-        border = this.add.image(360,601,"border_68");
+        border = this.add.image(360,601+playGame_offset,"border_68");
 
         this.anims.create({
             key: "loader",
@@ -468,8 +570,8 @@ var playGame = new Phaser.Class({
             repeat: -1
         });
 
+        this.input.on('gameobjectdown', function(pointer,gameObject,event){
 
-    this.input.on('gameobjectdown', function(pointer,gameObject){
 
 
       if(gameObject.object_type=='interactive_block'){
@@ -493,17 +595,24 @@ var playGame = new Phaser.Class({
                   BlockDrop(firstblk,prevblk);
                 }
             }
-          }else if(gameObject.object_type=='undo_button'){
-          if(current_move>0){
-                  Undo();
-              }
+        }else if(gameObject.object_type=='undo_button'){
+              if(current_move>0){
+                      Undo();
+                  }
         }else if(gameObject.object_type=='menu_button'){
+
+                  var block_num = blockNumGroup.getChildren();
 
                   //resetting replay stuff
                   clearInterval(replay_interval);
                   replay_is_active=0;
                   replay_stage=0;
                   replay_play.setFrame(0);
+
+                  if(firstblk){
+                      block_num[firstblk.block_id].setColor("#000");
+                      firstblk=''; prevblk='';
+                  }
 
                   //otherwise a reload level might create a bug, since firstblk will then no longer exist
                   firstblk='';//resetting click
@@ -529,6 +638,9 @@ var playGame = new Phaser.Class({
           firstblk=gameObject;
           prevblk=gameObject;
           BlockDoubleclick(firstblk);
+        }else if(gameObject.object_type=='rules_button'){
+          PlayAudio2(6);
+          this.scene.switch("showRules");
         }else if(gameObject.object_type=='replay_bck'){
                 if(replay_is_active==0 && current_move>1){
                   var block = blockGroup.getChildren();
@@ -559,6 +671,11 @@ var playGame = new Phaser.Class({
 
               var block = blockGroup.getChildren();
 
+              if(total_blocks==0){
+                SetupReplayBoard(current_rboard_type,current_rboard_seed);
+                return;
+              }
+
               if(replay_is_active==0){
           		//PLAY button
           		replay_is_active=1;
@@ -573,8 +690,10 @@ var playGame = new Phaser.Class({
                 var first = block[replay_weekly_first[current_move]];
                 var second = block[replay_weekly_second[current_move]];
               }
-              first.setFrame(first.block_value-1);
-              second.setFrame(second.block_value-1);
+              var endgamecolorsaddition=0;//to make sure we color correctly during the endgame phase
+              if(endgame==1){endgamecolorsaddition=15;}
+              first.setFrame(first.block_value-1+endgamecolorsaddition);
+              if(total_blocks>1){second.setFrame(second.block_value-1+endgamecolorsaddition);}
 
           		RunReplaySimulation();
 
@@ -596,29 +715,140 @@ var playGame = new Phaser.Class({
                   var first = block[replay_weekly_first[current_move]];
                   var second = block[replay_weekly_second[current_move]];
           			}
-                first.setFrame(first.block_value-1);
-                second.setFrame(second.block_value-1);
+                var endgamecolorsaddition=0;//to make sure we color correctly during the endgame phase
+                if(endgame==1){endgamecolorsaddition=15;}
+                first.setFrame(first.block_value-1+endgamecolorsaddition);
+                if(total_blocks>1){second.setFrame(second.block_value-1+endgamecolorsaddition);}
 
           	}
           }
 
-
+          event.stopPropagation();
 
       },this);
 
+                          //deselect a block if one is selected
+                          this.input.on('pointerdown', function(){
+                                if(firstblk){
+                                    var block_num = blockNumGroup.getChildren();
+
+                                    block_num[firstblk.block_id].setColor("#000");
+                                    firstblk=''; prevblk='';
+                                    PlayAudio2(7);
+                                  }
+                          },this);
 
 
 
-
-    }
-
-
+  }//create
 
   });
 
 
 
+function Tutorial(page){
+  switch(page){
+    case 1:
+              var upper_content= [
+                "Your goal is to remove all blocks from the board, and do it as efficiently as possible",
+                "\n",
+                "There are only 5 rules to the game",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('');
 
+              tut_image.alpha=0;
+
+    break;
+    case 2:
+              var upper_content= [
+                "Rule 1.\n",
+                "Combine blocks of same value by first clicking on one, then on the other",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('This removes blocks with no loss of score');
+              tut_image.alpha=1;
+              tut_image.setTexture("tutorial_image_1");
+    break;
+    case 3:
+              var upper_content= [
+                "Rule 2.\n",
+                "Combine blocks of different value",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('This subtracts blocks with a loss of score');
+              tut_image.alpha=1;
+              tut_image.setTexture("tutorial_image_2");
+    break;
+    case 4:
+              var upper_content= [
+                "Rule 2.\n",
+                "Combine blocks of different value",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('This subtracts blocks with a loss of score');
+              tut_image.alpha=1;
+              tut_image.setTexture("tutorial_image_3");
+    break;
+    case 5:
+              var upper_content= [
+                "Rule 3.\n",
+                "You can combine blocks horizontally or vertically",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('You can go across empty spaces, but you are not allowed to jump over other blocks');
+              tut_image.alpha=1;
+              tut_image.setTexture("tutorial_image_4");
+    break;
+    case 6:
+              var upper_content= [
+                "Rule 4.\n",
+                "Blocks with value \"1\" can jump around the board",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('');
+              tut_image.alpha=1;
+              tut_image.setTexture("tutorial_image_5");
+    break;
+    case 7:
+              var upper_content= [
+                "Rule 5.\n",
+                "When 10 blocks remain, the puzzle enters \"end game phase\"",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('Any block can now jump around the board');
+              tut_image.alpha=1;
+              tut_image.setTexture("tutorial_image_6");
+    break;
+    case 8:
+              var upper_content= [
+                "Rule 5.\n",
+                "If one block remains, remove it by a tap as it becomes highlighted",
+                "\n"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('');
+              tut_image.alpha=1;
+              tut_image.setTexture("tutorial_image_7");
+    break;
+    case 9:
+              var upper_content= [
+                "Scores are shared:\n",
+                "if you make a new record, all other players will see it"
+              ];
+              tut_text_upper.setText(upper_content);
+              tut_text_lower.setText('');
+              tut_image.alpha=0;
+    break;
+  }
+}
 
 function gameover_on(){
 
@@ -786,12 +1016,20 @@ function CreateLevel(){
 	undo_id_two=[];
 
   if(board_type=='q'){
+    playGame_offset=-10;
+      blocks_left_text.y=82+playGame_offset;
+      lost_text.y=82+playGame_offset;
+      top_panel_border_100.y=66+playGame_offset;
+      your_best_text.y=24+playGame_offset;
+      rules_button.y=16+playGame_offset;
+
+
     total_blocks=48;
     board_rows=8;
     board_columns=6;
-    border = PhaserContext.add.image(360,601,"border_100");
-    menu_button.x=20;menu_button.y=1062;
-    undo_button.x=540;undo_button.y=1062;
+    border = PhaserContext.add.image(360,601+playGame_offset,"border_100");
+    menu_button.x=20;menu_button.y=1062+playGame_offset;
+    undo_button.x=540;undo_button.y=1062+playGame_offset;
         if(IsDailyBoard()){
             if(your_daily_best[1]==999){your_best_text.setText("");}
             else{
@@ -802,12 +1040,20 @@ function CreateLevel(){
             your_best_text.setText('');
         }
   }else{
+    playGame_offset=26;
+      blocks_left_text.y=82+playGame_offset;
+      lost_text.y=82+playGame_offset;
+      top_panel_border_100.y=66+playGame_offset;
+      your_best_text.y=24+playGame_offset;
+      rules_button.y=16+playGame_offset;
+
+
     total_blocks=99;
     board_rows=11;
     board_columns=9;
-    border = PhaserContext.add.image(360,565,"border_68");
-    menu_button.x=20;menu_button.y=990;
-    undo_button.x=540;undo_button.y=990;
+    border = PhaserContext.add.image(360,565+playGame_offset,"border_68");
+    menu_button.x=20;menu_button.y=990+playGame_offset;
+    undo_button.x=540;undo_button.y=990+playGame_offset;
     if(IsWeeklyBoard()){
         if(your_weekly_best[1]==999){your_best_text.setText("");}
         else{your_best_text.setText("Your best on this board: "+your_weekly_best[1]);yourbestscore_position(your_weekly_best[1]);}
@@ -834,11 +1080,11 @@ function CreateLevel(){
       var value = Math.floor(m.random()*15);
 
         if(board_type=='q'){
-          var block = PhaserContext.add.image(85+110*(x),106+110*(y+1),"blocks_large_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000' });
+          var block = PhaserContext.add.image(85+110*(x),(106+110*(y+1))+playGame_offset,"blocks_large_default").setInteractive();
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000', metrics: {ascent:45,descent:100,fontSize:51} });
         }else{
-          var block = PhaserContext.add.image(64+74*(x),121+74*(y+1),"blocks_small_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000' });
+          var block = PhaserContext.add.image(64+74*(x),(121+74*(y+1))+playGame_offset,"blocks_small_default").setInteractive();
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000', metrics: {ascent: 32, descent: 7, fontSize: 39} });
         }
 
 
@@ -865,9 +1111,6 @@ function CreateLevel(){
             }//x
         }//y
 
-
-
-
 }
 function CreateReplayLevel(){
 
@@ -887,20 +1130,44 @@ function CreateReplayLevel(){
 	undo_id_two=[];
 
   if(board_type=='q'){
+    playGame_offset=-10;
+      blocks_left_text.y=82+playGame_offset;
+      lost_text.y=82+playGame_offset;
+      top_panel_border_100.y=66+playGame_offset;
+      your_best_text.y=24+playGame_offset;
+      rules_button.y=16+playGame_offset;
+
+      replay_play.y=1062+playGame_offset;
+      replay_bck.y=1062+playGame_offset;
+      replay_fwd.y=1062+playGame_offset;
+
+
     total_blocks=48;
     board_rows=8;
     board_columns=6;
-    border = PhaserContext.add.image(360,601,"border_100");
-    menu_button.x=20;menu_button.y=1062;
-    undo_button.x=540;undo_button.y=1062;
+    border = PhaserContext.add.image(360,601+playGame_offset,"border_100");
+    menu_button.x=20;menu_button.y=1062+playGame_offset;
+    undo_button.x=540;undo_button.y=1062+playGame_offset;
 
   }else{
+    playGame_offset=26;
+      blocks_left_text.y=82+playGame_offset;
+      lost_text.y=82+playGame_offset;
+      top_panel_border_100.y=66+playGame_offset;
+      your_best_text.y=24+playGame_offset;
+      rules_button.y=16+playGame_offset;
+
+      replay_play.y=990+playGame_offset;
+      replay_bck.y=990+playGame_offset;
+      replay_fwd.y=990+playGame_offset;
+
+
     total_blocks=99;
     board_rows=11;
     board_columns=9;
-    border = PhaserContext.add.image(360,565,"border_68");
-    menu_button.x=20;menu_button.y=990;
-    undo_button.x=540;undo_button.y=990;
+    border = PhaserContext.add.image(360,565+playGame_offset,"border_68");
+    menu_button.x=20;menu_button.y=990+playGame_offset;
+    undo_button.x=540;undo_button.y=990+playGame_offset;
   }
 
   your_best_text.setText("");
@@ -919,11 +1186,11 @@ function CreateReplayLevel(){
       var value = Math.floor(m.random()*15);
 
         if(board_type=='q'){
-          var block = PhaserContext.add.image(85+110*(x),106+110*(y+1),"blocks_large_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000' });
+          var block = PhaserContext.add.image(85+110*(x),(106+110*(y+1))+playGame_offset,"blocks_large_default").setInteractive();
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000', metrics: {ascent:45,descent:100,fontSize:51} });
         }else{
-          var block = PhaserContext.add.image(64+74*(x),121+74*(y+1),"blocks_small_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000' });
+          var block = PhaserContext.add.image(64+74*(x),(121+74*(y+1))+playGame_offset,"blocks_small_default").setInteractive();
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000', metrics: {ascent: 32, descent: 7, fontSize: 39} });
         }
 
 
@@ -997,6 +1264,7 @@ function BlockDrop(first,second){
 
 				//the sound is played first, so that in case of Friday boards the gameover sound is not overdubbed by this sound: in case of Friday boards there is no delay in the form of ServerCompareScore(), therefore, the gameover_on() sound is overriden by this standard sound
 				PlayAudio2(2);
+        if(first.object_type=='interactive_block'){navigator.vibrate([70]);}
 				TotalBlocks(2);
 
 
@@ -1097,6 +1365,8 @@ function RemoveBlock(block){
 
   block.alpha=0;
   block.setInteractive(false);
+  //block.object_type='hidden_block';
+
 
 	}
 
@@ -1112,6 +1382,7 @@ function RestoreBlock(block_id,value_id){
 
   block[block_id].alpha=1;
   block[block_id].block_value=value_id;
+  //block.object_type='interactive_block';
   block[block_id].setInteractive();
 
   //working colors
@@ -1230,6 +1501,7 @@ function TotalBlocks(amount){
 			one_block_left=999;//resetting the last block flag
       undo_button.setFrame(1);
 
+      navigator.vibrate([200]);
 
 			if(board_seed>0){
 				current_move=0;
@@ -1630,15 +1902,9 @@ function SetupReplayBoard(rboard_type,rboard_seed){
 	if(rboard_type=='q'){
     board_type='q';
 		replay_length=replay_daily_first.length-1;//amount if steps in a replay
-    replay_play.y=1062;
-    replay_bck.y=1062;
-    replay_fwd.y=1062;
 	}else{
     board_type='f';
 		replay_length=replay_weekly_first.length-1;//amount if steps in a replay
-    replay_play.y=990;
-    replay_bck.y=990;
-    replay_fwd.y=990;
 	}
 
   CreateReplayLevel();
