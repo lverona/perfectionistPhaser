@@ -1,8 +1,10 @@
 Fixes.
 
-1. Add color schemes
-3. since I now have block.block_value, see if I can simplify code
-4. RestoreBlocks has "value_id" as input, but really, it seems simply value. Re-check.
-6. If there is no replay - the app will just fail. Need a workaround, or rather a check that there is a replay. If not, somehow make that clear.
-8. Create a mechanism which will save the replay and maybe retry re-uploading it when Internet comes back. But this is a power feature, definitely not essential.
-9. Add the ability to play Yesterday's board.
+1. since I now have block.block_value, see if I can simplify code
+2. RestoreBlocks has "value_id" as input, but really, it seems simply value. Re-check.
+3. If there is no replay - the app will just fail. Need a workaround, or rather a check that there is a replay. If not, somehow make that clear.
+4. Create a mechanism which will save the replay and maybe retry re-uploading it when Internet comes back. But this is a power feature, definitely not essential.
+5. Add the ability to play Yesterday's board.
+6. Make the reset sound louder. And maybe make the Undo sound quieter.
+7. Add a border around a Daily or Weekly if someone beat your record, or if you still haven't played the board
+8. Add the ability to play Yesterday's board, and add a replay link to all non-periodicals.

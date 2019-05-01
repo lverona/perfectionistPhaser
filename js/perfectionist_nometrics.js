@@ -141,7 +141,6 @@ window.onload = function() {
         }
 
         window.addEventListener("blur", function(event) {
-          //console.log(PhaserContext);
           if (PhaserContext.scale.isFullscreen)
           {
               full_screen_button.setFrame(0);
@@ -589,7 +588,6 @@ var showMenu = new Phaser.Class({
               this.scene.switch("showSettings");
 
           }else if(gameObject.object_type=='full_screen_button'){
-
                       if (PhaserContext.scale.isFullscreen)
                       {
                           full_screen_button.setFrame(0);
@@ -1197,13 +1195,15 @@ function CreateLevel(){
       your_best_text.y=24+playGame_offset;
       rules_button.y=16+playGame_offset;
 
+
+    total_blocks=48;
     board_rows=8;
     board_columns=6;
     border = PhaserContext.add.image(360,601+playGame_offset,"border_100");
     menu_button.x=20;menu_button.y=1062+playGame_offset;
     undo_button.x=540;undo_button.y=1062+playGame_offset;
         if(IsDailyBoard()){
-            if(your_daily_best[1]==999){your_best_text.setText("Your best on this board: ?");}
+            if(your_daily_best[1]==999){your_best_text.setText("");}
             else{
               your_best_text.setText("Your best on this board: "+your_daily_best[1]);
               yourbestscore_position(your_daily_best[1]);
@@ -1219,13 +1219,15 @@ function CreateLevel(){
       your_best_text.y=24+playGame_offset;
       rules_button.y=16+playGame_offset;
 
+
+    total_blocks=99;
     board_rows=11;
     board_columns=9;
     border = PhaserContext.add.image(360,565+playGame_offset,"border_68");
     menu_button.x=20;menu_button.y=990+playGame_offset;
     undo_button.x=540;undo_button.y=990+playGame_offset;
     if(IsWeeklyBoard()){
-        if(your_weekly_best[1]==999){your_best_text.setText("Your best on this board: ?");}
+        if(your_weekly_best[1]==999){your_best_text.setText("");}
         else{your_best_text.setText("Your best on this board: "+your_weekly_best[1]);yourbestscore_position(your_weekly_best[1]);}
       }else{
         your_best_text.setText('');
@@ -1251,10 +1253,10 @@ function CreateLevel(){
 
         if(board_type=='q'){
           var block = PhaserContext.add.image(85+110*(x),(106+110*(y+1))+playGame_offset,"blocks_large_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000', metrics: {ascent:45,descent:100,fontSize:51} });
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000' });
         }else{
           var block = PhaserContext.add.image(64+74*(x),(121+74*(y+1))+playGame_offset,"blocks_small_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000', metrics: {ascent: 32, descent: 7, fontSize: 39} });
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000' });
         }
 
 
@@ -1311,6 +1313,8 @@ function CreateReplayLevel(){
       replay_bck.y=1062+playGame_offset;
       replay_fwd.y=1062+playGame_offset;
 
+
+    total_blocks=48;
     board_rows=8;
     board_columns=6;
     border = PhaserContext.add.image(360,601+playGame_offset,"border_100");
@@ -1329,6 +1333,8 @@ function CreateReplayLevel(){
       replay_bck.y=990+playGame_offset;
       replay_fwd.y=990+playGame_offset;
 
+
+    total_blocks=99;
     board_rows=11;
     board_columns=9;
     border = PhaserContext.add.image(360,565+playGame_offset,"border_68");
@@ -1353,10 +1359,10 @@ function CreateReplayLevel(){
 
         if(board_type=='q'){
           var block = PhaserContext.add.image(85+110*(x),(106+110*(y+1))+playGame_offset,"blocks_large_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000', metrics: {ascent:45,descent:100,fontSize:51} });
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '34pt', color: '#000' });
         }else{
           var block = PhaserContext.add.image(64+74*(x),(121+74*(y+1))+playGame_offset,"blocks_small_default").setInteractive();
-          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000', metrics: {ascent: 32, descent: 7, fontSize: 39} });
+          var block_num = PhaserContext.add.text(block.x, block.y, value+1, { fontFamily:'Heebo', fontSize: '26pt', color: '#000' });
         }
 
 

@@ -1,3 +1,19 @@
+//recoloring the blocks
+var block_num = blockNumGroup.getChildren();
+
+//recoloring blocks back
+blockGroup.children.iterate(function (child) {
+    child.setFrame(block_num[child.block_id].blocknum_value - 1 + color_scheme);
+  });
+
+
+
+
+
+board_seed=Math.floor((Math.random()*2147483647)+1);
+
+
+
 var sceneName = new Phaser.Class({
     Extends: Phaser.Scene,
     initialize:
@@ -25,10 +41,11 @@ update: function(){
 }
 
 
+this.input.on('gameobjectdown', function(pointer,gameObject){
+        if(gameObject.object_type=='daily_button'){
 
-//iteration, but just clear(true) seemed to work for me
-blockGroup.children.iterate(function (child) {
-    child.destroy();
-});
 
-blockGroup.clear(true);
+        }else if(gameObject.object_type=='weekly_button'){
+
+        }
+},this);
