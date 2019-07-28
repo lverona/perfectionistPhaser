@@ -243,10 +243,10 @@ function ReplayBoard($board_seed,$rows,$columns,$undo_id_one,$undo_id_two,$lost,
       if ($debug>1) echo '<b>Pass</b>: No illegal moves.<br>';
 
       if($total_blocks!=0){
-        if ($debug>1) echo '<b>Error</b>: Total blocks are not 0.<br>';
+        if ($debug>1) echo '<b>Error</b>: Total blocks is not 0.<br>';
         exit();
       }else{
-        if ($debug>1) echo '<b>Pass</b>: Total blocks are 0.<br>';
+        if ($debug>1) echo '<b>Pass</b>: Total blocks is 0.<br>';
       }
 
         if ($debug>1) echo '<b>Pass for all checks.</b>';

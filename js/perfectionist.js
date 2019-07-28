@@ -164,7 +164,7 @@ var preloadAssets = new Phaser.Class({
     },
     preload: function(){
 
-      this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
+      //this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
 
       this.load.spritesheet("blocks_small_default", "assets/img/colorset_68_default.png", {
           frameWidth: 68,
@@ -177,6 +177,10 @@ var preloadAssets = new Phaser.Class({
       this.load.spritesheet("undo_button", "assets/img/undo.png", {
           frameWidth: 160,
           frameHeight: 62
+      });
+      this.load.spritesheet("playmode", "assets/img/solution_playmode.png", {
+          frameWidth: 187,
+          frameHeight: 44
       });
       this.load.image("border_100", "assets/img/border_100.png");
       this.load.image("border_68", "assets/img/border_68.png");
@@ -245,11 +249,11 @@ var preloadAssets = new Phaser.Class({
     },
     create: function(){
 
-      WebFont.load({
+      /*WebFont.load({
               google: {
                   families: [ 'Ubuntu', 'Heebo' ]
               }
-          });
+          });*/
 
         this.scene.launch("gameOver");
         this.scene.sleep("gameOver");
@@ -452,12 +456,12 @@ var showMenu = new Phaser.Class({
 
         this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "title_background");
 
-        splash = this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "splash").setInteractive().setDepth(1);
-        splash.object_type='splash';
+          //splash = this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "splash").setInteractive().setDepth(1);
+          //splash.object_type='splash';
 
-        full_screen_button = this.add.image(40, 40, "full_screen_button").setInteractive();
-        full_screen_button.object_type='full_screen_button';
-        full_screen_button.setFrame(0);
+        //full_screen_button = this.add.image(40, 40, "full_screen_button").setInteractive();
+        //full_screen_button.object_type='full_screen_button';
+        //full_screen_button.setFrame(0);
 
         var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'Louigi Verona\'s', { fontFamily:'Heebo', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 39, descent: 8, fontSize: 47} });
         title_text_1.setOrigin(0.5,0);
@@ -465,39 +469,39 @@ var showMenu = new Phaser.Class({
         var title_text_2=this.add.text(this.game.renderer.width / 2, 55,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 82, descent: 19, fontSize: 101} });
         title_text_2.setOrigin(0.5,0);
 
-        today_sign=this.add.text(this.game.renderer.width / 2, 240+showMenu_offset,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
+        today_sign=this.add.text(this.game.renderer.width / 2, 240+showMenu_offset,'', { fontFamily:'Heebo', fontSize: '24pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
         today_sign.setOrigin(0.5,0);
 
         daily_button=this.add.image(this.game.renderer.width / 2, 312+showMenu_offset, "standard_menu_buttons").setInteractive();
         daily_button.setFrame(0);
         daily_button.object_type='daily_button';
-        daily_button_sign=this.add.text(this.game.renderer.width / 2, 312+showMenu_offset,'Daily Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
+        daily_button_sign=this.add.text(this.game.renderer.width / 2, 312+showMenu_offset,'Daily Board', { fontFamily:'Heebo', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
 
 
-        week_sign=this.add.text(this.game.renderer.width / 2, 400+showMenu_offset,'', { fontFamily:'Ubuntu', fontSize: '24pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
+        week_sign=this.add.text(this.game.renderer.width / 2, 400+showMenu_offset,'', { fontFamily:'Heebo', fontSize: '24pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
         week_sign.setOrigin(0.5,0);
 
         weekly_button=this.add.image(this.game.renderer.width / 2, 472+showMenu_offset, "standard_menu_buttons").setInteractive();
         weekly_button.setFrame(0);
         weekly_button.object_type='weekly_button';
-        this.add.text(this.game.renderer.width / 2, 472+showMenu_offset,'Weekly Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
+        this.add.text(this.game.renderer.width / 2, 472+showMenu_offset,'Weekly Board', { fontFamily:'Heebo', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
 
-        this.add.text(this.game.renderer.width / 2, 628+showMenu_offset,'Solutions', { fontFamily:'Ubuntu', fontSize: '28pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 35, descent: 7, fontSize: 42} }).setOrigin(0.5,0);
+        this.add.text(this.game.renderer.width / 2, 628+showMenu_offset,'Solutions', { fontFamily:'Heebo', fontSize: '28pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 35, descent: 7, fontSize: 42} }).setOrigin(0.5,0);
 
         var replay_daily_button=this.add.image(this.game.renderer.width / 2, 720+showMenu_offset, "narrow_menu_buttons").setInteractive();
         replay_daily_button.setFrame(0);
         replay_daily_button.object_type='replay_daily_button';
-        var yest = this.add.text(this.game.renderer.width / 2, 720+showMenu_offset,'Yesterday\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
+        var yest = this.add.text(this.game.renderer.width / 2, 720+showMenu_offset,'Yesterday\'s Board', { fontFamily:'Heebo', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
 
         var replay_weekly_button=this.add.image(this.game.renderer.width / 2, 818+showMenu_offset, "narrow_menu_buttons").setInteractive();
         replay_weekly_button.setFrame(0);
         replay_weekly_button.object_type='replay_weekly_button';
-        this.add.text(this.game.renderer.width / 2, 818+showMenu_offset,'Last Week\'s Board', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
+        this.add.text(this.game.renderer.width / 2, 818+showMenu_offset,'Last Week\'s Board', { fontFamily:'Heebo', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
 
         var settings_button=this.add.image(this.game.renderer.width / 2, 960+showMenu_offset, "narrow_menu_buttons").setInteractive();
         settings_button.setFrame(1);
         settings_button.object_type='settings_button';
-        this.add.text(this.game.renderer.width / 2, 960+showMenu_offset,'Settings', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
+        this.add.text(this.game.renderer.width / 2, 960+showMenu_offset,'Settings', { fontFamily:'Heebo', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
 
         var close_button=this.add.image(this.game.renderer.width / 2, 1070+showMenu_offset, "close_button").setInteractive();
         close_button.object_type='close_button';
@@ -507,6 +511,7 @@ var showMenu = new Phaser.Class({
           board_type=init_board_type;
           init_seed=0;
           init_board_type=0;
+          //splash.destroy();
           CreateLevel();
           this.scene.switch("playGame");
         }
@@ -515,7 +520,7 @@ var showMenu = new Phaser.Class({
         //getting the daily and weekly board
         ServerReadPeriodical();
         //getting yesterday's and previous week's solutions
-        ServerReadReplay();
+        ServerReadReplayPeriodical();
 
         this.input.on('gameobjectdown', function(pointer,gameObject){
 
@@ -546,7 +551,7 @@ var showMenu = new Phaser.Class({
 
             CreateLevel();
 
-            navigator.vibrate([70]);
+            //navigator.vibrate([70]);
             this.scene.switch("playGame");
 
           }else if(gameObject.object_type=='weekly_button'){
@@ -564,7 +569,7 @@ var showMenu = new Phaser.Class({
 
       			CreateLevel();
 
-            navigator.vibrate([70]);
+            //navigator.vibrate([70]);
             this.scene.switch("playGame");
           }else if(gameObject.object_type=='replay_daily_button'){
 
@@ -608,7 +613,7 @@ var showMenu = new Phaser.Class({
                     }
 
                     PlayAudio2(6);
-                    navigator.vibrate([70]);
+                    //navigator.vibrate([70]);
                     this.scene.switch("playGame");
           }
 
@@ -706,6 +711,11 @@ var playGame = new Phaser.Class({
         rules_button=this.add.image(20,16+playGame_offset,"rules_button").setInteractive();
         rules_button.setOrigin(0);
         rules_button.object_type='rules_button';
+
+        playmode_button=this.add.image(513,16+playGame_offset,"playmode").setInteractive();
+        playmode_button.setOrigin(0);
+        playmode_button.alpha=0;
+        playmode_button.object_type='playmode_button';
 
         menu_button=this.add.image(20,1062+playGame_offset,"menu_button").setInteractive();
         menu_button.setOrigin(0);
@@ -812,6 +822,15 @@ var playGame = new Phaser.Class({
           firstblk=gameObject;
           prevblk=gameObject;
           BlockDoubleclick(firstblk);
+        }else if(gameObject.object_type=='playmode_button'){
+          if(replay_is_active==0){
+            PlayAudio2(6);
+            ReplayPanel(0);
+            board_seed=current_rboard_seed;
+            board_type=current_rboard_type;
+            CreateLevel();
+          }
+
         }else if(gameObject.object_type=='rules_button'){
           PlayAudio2(6);
           this.scene.switch("showRules");
@@ -1196,6 +1215,7 @@ function CreateLevel(){
       top_panel_border_100.y=66+playGame_offset;
       your_best_text.y=24+playGame_offset;
       rules_button.y=16+playGame_offset;
+      playmode_button.y=16+playGame_offset;
 
     board_rows=8;
     board_columns=6;
@@ -1218,6 +1238,7 @@ function CreateLevel(){
       top_panel_border_100.y=66+playGame_offset;
       your_best_text.y=24+playGame_offset;
       rules_button.y=16+playGame_offset;
+      playmode_button.y=16+playGame_offset;
 
     board_rows=11;
     board_columns=9;
@@ -1306,6 +1327,7 @@ function CreateReplayLevel(){
       top_panel_border_100.y=66+playGame_offset;
       your_best_text.y=24+playGame_offset;
       rules_button.y=16+playGame_offset;
+      playmode_button.y=16+playGame_offset;
 
       replay_play.y=1062+playGame_offset;
       replay_bck.y=1062+playGame_offset;
@@ -1324,6 +1346,7 @@ function CreateReplayLevel(){
       top_panel_border_100.y=66+playGame_offset;
       your_best_text.y=24+playGame_offset;
       rules_button.y=16+playGame_offset;
+      playmode_button.y=16+playGame_offset;
 
       replay_play.y=990+playGame_offset;
       replay_bck.y=990+playGame_offset;
@@ -1695,9 +1718,9 @@ function TotalBlocks(amount){
 			one_block_left=999;//resetting the last block flag
       undo_button.setFrame(1);
 
-      navigator.vibrate([200]);
+      //navigator.vibrate([200]);
 
-			if(board_seed>0){
+			if(board_seed>0){//maybe we'll need to check for board_seed simply existing when Friday Boards are going to be here
 				current_move=0;
     				//first get the score from the server
             ajax_loader = PhaserContext.add.sprite(this.game.renderer.width / 2,this.game.renderer.height / 2,"ajax_loader").play("loader");
@@ -1737,7 +1760,7 @@ function TotalBlocks(amount){
 		//wrap in anonymous function for setTimeout to work
 		setTimeout(function (){
       PlayAudio2(4);
-      navigator.vibrate([70]);
+      //navigator.vibrate([70]);
     }, 200);
 		endgame=1;//endgame flag
 
@@ -1917,7 +1940,7 @@ function ServerCompareScore(){
 
 }
 
-function ServerReadReplay(){
+function ServerReadReplayPeriodical(){
 
   var xhttp = new XMLHttpRequest();
 
@@ -2069,20 +2092,24 @@ function ReplayPanel(state=0){
     replay_play.alpha=0;
     replay_bck.alpha=0;
     replay_fwd.alpha=0;
+    playmode_button.alpha=0;
 
     replay_play.setInteractive(false);
     replay_bck.setInteractive(false);
     replay_fwd.setInteractive(false);
+    playmode_button.setInteractive(false);
 
   }else if(state==1){
     undo_button.alpha=0;
     replay_play.alpha=1;
     replay_bck.alpha=1;
     replay_fwd.alpha=1;
+    playmode_button.alpha=1;
 
     replay_play.setInteractive();
     replay_bck.setInteractive();
     replay_fwd.setInteractive();
+    playmode_button.setInteractive();
 
     replay_play.setFrame(0);
   }

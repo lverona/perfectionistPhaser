@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 01, 2019 at 04:29 PM
+-- Generation Time: May 05, 2019 at 01:53 PM
 -- Server version: 5.5.62-0ubuntu0.14.04.1
 -- PHP Version: 7.1.27-1+ubuntu14.04.1+deb.sury.org+1
 
@@ -50,6 +50,7 @@ INSERT INTO `periodicals` (`seed`, `type`, `date`, `year`) VALUES
 (96470892, 1, 102, 2019),
 (143689845, 1, 81, 2019),
 (163604257, 1, 113, 2019),
+(206040460, 1, 122, 2019),
 (230677918, 1, 104, 2019),
 (246407218, 2, 15, 2019),
 (276205135, 1, 119, 2019),
@@ -62,6 +63,7 @@ INSERT INTO `periodicals` (`seed`, `type`, `date`, `year`) VALUES
 (434381698, 1, 86, 2019),
 (447036164, 1, 80, 2019),
 (516131915, 1, 88, 2019),
+(523271138, 1, 124, 2019),
 (533329071, 1, 108, 2019),
 (545320574, 1, 95, 2019),
 (657729824, 1, 101, 2019),
@@ -77,6 +79,7 @@ INSERT INTO `periodicals` (`seed`, `type`, `date`, `year`) VALUES
 (1151788195, 1, 99, 2019),
 (1275866088, 1, 85, 2019),
 (1279453498, 1, 92, 2019),
+(1298455804, 1, 121, 2019),
 (1327748919, 1, 105, 2019),
 (1328043913, 1, 100, 2019),
 (1369132867, 1, 98, 2019),
@@ -89,7 +92,8 @@ INSERT INTO `periodicals` (`seed`, `type`, `date`, `year`) VALUES
 (1651063086, 2, 13, 2019),
 (1885930846, 2, 16, 2019),
 (1985835963, 1, 96, 2019),
-(2052433686, 2, 12, 2019);
+(2052433686, 2, 12, 2019),
+(2135685173, 1, 123, 2019);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
