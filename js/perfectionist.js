@@ -236,7 +236,8 @@ var preloadAssets = new Phaser.Class({
       this.load.image("settings_left_arrow", "assets/img/settings_left_arrow.png");
       this.load.image("settings_right_arrow", "assets/img/settings_right_arrow.png");
 
-      this.load.image("splash","assets/img/splash.png");
+      //this.load.image("splash","assets/img/splash.png");
+      this.load.image("join_our_discord","assets/img/join_our_discord.png");
 
       this.load.spritesheet("full_screen_button", "assets/img/full_screen_button.png", {
           frameWidth: 50,
@@ -463,11 +464,18 @@ var showMenu = new Phaser.Class({
         //full_screen_button.object_type='full_screen_button';
         //full_screen_button.setFrame(0);
 
-        var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'Louigi Verona\'s', { fontFamily:'Heebo', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 39, descent: 8, fontSize: 47} });
-        title_text_1.setOrigin(0.5,0);
+        //var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'Louigi Verona\'s', { fontFamily:'Heebo', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 39, descent: 8, fontSize: 47} });
+        //title_text_1.setOrigin(0.5,0);
 
-        var title_text_2=this.add.text(this.game.renderer.width / 2, 55,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 82, descent: 19, fontSize: 101} });
+        //var title_text_2=this.add.text(this.game.renderer.width / 2, 55,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 82, descent: 19, fontSize: 101} });
+        //title_text_2.setOrigin(0.5,0);
+
+        var title_text_2=this.add.text(this.game.renderer.width / 2, 20,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 82, descent: 19, fontSize: 101} });
         title_text_2.setOrigin(0.5,0);
+
+        var discord_image=this.add.image(this.game.renderer.width / 2, 150+showMenu_offset, "join_our_discord").setInteractive();
+        discord_image.object_type='website';
+
 
         today_sign=this.add.text(this.game.renderer.width / 2, 240+showMenu_offset,'', { fontFamily:'Heebo', fontSize: '24pt', color: '#999999', fontStyle: 'bold', metrics:{ascent: 30, descent: 6, fontSize: 36} });
         today_sign.setOrigin(0.5,0);
@@ -588,6 +596,10 @@ var showMenu = new Phaser.Class({
           }else if(gameObject.object_type=='splash'){
               PlayAudio2(6);
               gameObject.destroy();
+          }else if(gameObject.object_type=='website'){
+
+              window.open("https://discord.gg/AVHRPhJ", "_blank");
+
           }else if(gameObject.object_type=='settings_button'){
 
               PlayAudio2(6);

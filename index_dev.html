@@ -36,6 +36,13 @@
             }
         </style>
 
+				<!-- The core Firebase JS SDK is always required and must be listed first -->
+				<script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
+
+				 <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-auth.js"></script>
+				 <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+ 				<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
 				<script type="text/javascript" src="js/phaser-custom.min.js"></script>
 				<!--<script type="text/javascript" src="js/phaser.min.js"></script>-->
 				<script type="text/javascript" src="js/randomseed.min.js"></script>
@@ -48,5 +55,35 @@
 			<body>
 				<div style="font-family:'Heebo', sans-serif; position:absolute; left:-1000px; visibility:hidden;">.</div>
 				<div style="font-family:'Ubuntu', sans-serif; position:absolute; left:-1000px; visibility:hidden;">.</div>
+
+
+
+				<script>
+				  // Your web app's Firebase configuration
+				  var firebaseConfig = {
+				    apiKey: "AIzaSyBz3-G7bHe65-6TMw4-zodudLq6R0jVW8c",
+				    authDomain: "perfectionist-1cc33.firebaseapp.com",
+				    databaseURL: "https://perfectionist-1cc33.firebaseio.com",
+				    projectId: "perfectionist-1cc33",
+				    storageBucket: "perfectionist-1cc33.appspot.com",
+				    messagingSenderId: "95380322706",
+				    appId: "1:95380322706:web:7d113ae09516c10da3a94b"
+				  };
+				  // Initialize Firebase
+				  firebase.initializeApp(firebaseConfig);
+
+				var ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+				ui.start('#firebaseui-auth-container', {
+  signInOptions: [
+    firebase.auth.EmailAuthProvider.PROVIDER_ID
+  ],
+});
+
+				</script>
+
+				<!--<div id="firebaseui-auth-container"></div>-->
+
+
 			</body>
 			</html>
