@@ -1,0 +1,8 @@
+1. On the website the date in the boards table is actually the date of the best solution, not of the board.
+
+2. Right now it is still possible to get a replay for the current periodicals. The UI does not give access to it, but one can use the replay call for a custom board to ask for a replay or even to just spoof the variables from javascript.
+
+I can make sure
+
+2.1 I do not list daily and weekly in the boards list
+2.2 In the replay_custom file not return a replay if it's a daily or weekly

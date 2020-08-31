@@ -39,8 +39,6 @@ function GeneratingBoardSeed($dbLink,$date,$year,$board_type,$tries=5){
 //DAILY BOARD
 //////////////////////
 
-//if( date("N")!=5 ){//if it is not a Friday
-
   $date=date("z");//0-365
 
   //if daily board seed exists, just print it
@@ -57,17 +55,11 @@ function GeneratingBoardSeed($dbLink,$date,$year,$board_type,$tries=5){
 
   }
 
-//}
-//else{//if it is Friday
-//  $result[0]="-999";
-//}
 
 
 //////////////////////
 //WEEKLY BOARD
 //////////////////////
-
-//if( date("W") % 4 !=0 ){//if the week number not a multiple of 4
 
   $date=date("W");//1-52
 
@@ -85,12 +77,6 @@ function GeneratingBoardSeed($dbLink,$date,$year,$board_type,$tries=5){
 
   }
 
-//}
-//else{//if the week is a multiple of 4
-//  $result[1]="-999";
-//}
-
-
 
 //result 0 - daily board seed
 //result 1 - weekly board seed
@@ -98,8 +84,6 @@ function GeneratingBoardSeed($dbLink,$date,$year,$board_type,$tries=5){
 //result 3 - week number
 //result 4 - day number
 
-//for testing
-//$result[1]="-999";
   $result[2]=date("l, F dS");
   $result[3]=date("W");
   $result[4]=date("z");

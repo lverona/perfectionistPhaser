@@ -1,0 +1,19 @@
+How to know if we are in replay mode
+
+In function SetupReplayBoard
+//the seed is immediately removed, so that we know it is a replay
+	board_seed='';
+
+
+
+A "custom board" means any board which is not a weekly or a daily, and not yesterday's daily or last week's weekly, being fetched from a database.
+
+
+Obfuscator:
+
+Compact code
+Identifier: hex
+Simplify
+String Array
+Shuffle String Array
+Self Defending

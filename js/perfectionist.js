@@ -49,8 +49,15 @@ var replay_daily_board_seed;
 var replay_weekly_first;
 var replay_weekly_second;
 var replay_weekly_board_seed;
-var current_rboard_type='q';//a global type variable to assist in quickly manipulating replays
-var current_rboard_seed=0;//a global type variable to assist in quickly manipulating replays
+//replay arrays for a custom board
+var replay_custom_first;
+var replay_custom_second;
+//variables to feed to replay functions
+var current_rboard_type='q';
+var current_rboard_seed=0;
+var current_rboard_first;//solutions first array
+var current_rboard_second;//second array
+//replay functions variables
 var replay_is_active=0;//a flag whether a replay is happening
 var replay_stage=0;//a variable for a step by step replay; in the simulation function it is a local variable by design, since we want to restart from the beginning each time we play the move
 var replay_length=0;//how many steps is the replay going to be
@@ -61,8 +68,8 @@ var tutorial_page=1;
 
 //UI stuffs
 var show_world_record=1;//if the board is fresh, UpdateScore() shows a special sign saying "Current world record is"
-var PhaserContext;//this from the playGame scene
-var SettingsContext;//this from the showSettings scene
+var PhaserContext;//"this" from the playGame scene
+var SettingsContext;//"this" from the showSettings scene
 var text;
 var today_sign;
 var week_sign;
@@ -118,7 +125,7 @@ window.onload = function() {
         },
        backgroundColor: 0x222222,
        disableContextMenu: true,
-       scene: [preloadAssets, showMenu, gameOver, playGame, showRules, showSettings]
+       scene: [preloadAssets, showMenu, gameOver, playGame, showRules, showSettings, playMenu]
    };
 
    color_scheme_id=parseInt(localStorage.getItem('color_scheme_id'));
@@ -137,6 +144,9 @@ window.onload = function() {
             case 3:
               color_scheme=50;
             break;
+            case 4:
+              color_scheme=65;
+            break;
           }
         }
 
@@ -144,7 +154,7 @@ window.onload = function() {
           //console.log(PhaserContext);
           if (PhaserContext.scale.isFullscreen)
           {
-              full_screen_button.setFrame(0);
+              //full_screen_button.setFrame(0);
               PhaserContext.scale.stopFullscreen();
           }
         },
@@ -298,12 +308,13 @@ var showSettings = new Phaser.Class({
         switch(color_scheme_id){
           case 1: color_scheme_text.setText('Deep Space Nine'); break;
           case 2: color_scheme_text.setText('Antique Masonry'); break;
+          case 3: color_scheme_text.setText('Temperature'); break;
         }
 
         var back_button=this.add.image(this.game.renderer.width / 2, 960+showMenu_offset, "narrow_menu_buttons").setInteractive();
         back_button.setFrame(1);
         back_button.object_type='back_button';
-        this.add.text(this.game.renderer.width / 2, 960+showMenu_offset,'Back to Menu', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
+        this.add.text(this.game.renderer.width / 2, 960+showMenu_offset,'Back to Title', { fontFamily:'Ubuntu', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
 
 
         CreateSettingsBlocks();
@@ -318,11 +329,13 @@ var showSettings = new Phaser.Class({
                   var block_num = blockNumGroup.getChildren();
 
                   color_scheme_id++;
-                  if(color_scheme_id==3){color_scheme_id=1;}
+                  if(color_scheme_id==5){color_scheme_id=1;}
 
                   switch(color_scheme_id){
                     case 1: color_scheme = 0; color_scheme_text.setText('Deep Space Nine'); break;
                     case 2: color_scheme = 35; color_scheme_text.setText('Antique Masonry'); break;
+                    case 3: color_scheme = 50; color_scheme_text.setText('Temperature'); break;
+                    case 4: color_scheme = 65; color_scheme_text.setText('Monochrome'); break;
                   }
 
                   //recoloring blocks, but only if it is not endgame
@@ -340,11 +353,13 @@ var showSettings = new Phaser.Class({
                   var block_num = blockNumGroup.getChildren();
 
                   color_scheme_id--;
-                  if(color_scheme_id==0){color_scheme_id=2;}
+                  if(color_scheme_id==0){color_scheme_id=4;}
 
                   switch(color_scheme_id){
                     case 1: color_scheme = 0; color_scheme_text.setText('Deep Space Nine'); break;
                     case 2: color_scheme = 35; color_scheme_text.setText('Antique Masonry'); break;
+                    case 3: color_scheme = 50; color_scheme_text.setText('Temperature'); break;
+                    case 4: color_scheme = 65; color_scheme_text.setText('Monochrome'); break;
                   }
 
                   //recoloring blocks, but only if it is not endgame
@@ -457,19 +472,6 @@ var showMenu = new Phaser.Class({
 
         this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "title_background");
 
-          //splash = this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "splash").setInteractive().setDepth(1);
-          //splash.object_type='splash';
-
-        //full_screen_button = this.add.image(40, 40, "full_screen_button").setInteractive();
-        //full_screen_button.object_type='full_screen_button';
-        //full_screen_button.setFrame(0);
-
-        //var title_text_1=this.add.text(this.game.renderer.width / 2, 20,'Louigi Verona\'s', { fontFamily:'Heebo', fontSize: '30pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 39, descent: 8, fontSize: 47} });
-        //title_text_1.setOrigin(0.5,0);
-
-        //var title_text_2=this.add.text(this.game.renderer.width / 2, 55,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 82, descent: 19, fontSize: 101} });
-        //title_text_2.setOrigin(0.5,0);
-
         var title_text_2=this.add.text(this.game.renderer.width / 2, 20,'Perfectionist', { fontFamily:'Heebo', fontSize: '65pt', color: '#3b8adb', fontStyle: 'bold', metrics:{ascent: 82, descent: 19, fontSize: 101} });
         title_text_2.setOrigin(0.5,0);
 
@@ -514,13 +516,15 @@ var showMenu = new Phaser.Class({
         var close_button=this.add.image(this.game.renderer.width / 2, 1070+showMenu_offset, "close_button").setInteractive();
         close_button.object_type='close_button';
 
+        //if we get the board from the URL
         if(init_seed && init_board_type){
           board_seed=init_seed;
           board_type=init_board_type;
           init_seed=0;
           init_board_type=0;
-          //splash.destroy();
           CreateLevel();
+          //getting the solution for a custom board
+          ServerReadReplayCustom();
           this.scene.switch("playGame");
         }
 
@@ -536,15 +540,6 @@ var showMenu = new Phaser.Class({
 
           if(gameObject.object_type=='daily_button'){
 
-            //ajax_loader = this.add.sprite(this.game.renderer.width / 2,this.game.renderer.height / 2,"ajax_loader").play("loader").setDepth(1);
-
-            //Friday Board
-            if(board_seed_daily==-999){
-              board_type='q';
-              LoadLevel();
-              return false;
-            }
-
             //check if we have daily board seed
             if(board_seed_daily){
               board_type='q';
@@ -559,7 +554,6 @@ var showMenu = new Phaser.Class({
 
             CreateLevel();
 
-            //navigator.vibrate([70]);
             this.scene.switch("playGame");
 
           }else if(gameObject.object_type=='weekly_button'){
@@ -577,45 +571,34 @@ var showMenu = new Phaser.Class({
 
       			CreateLevel();
 
-            //navigator.vibrate([70]);
             this.scene.switch("playGame");
           }else if(gameObject.object_type=='replay_daily_button'){
 
               current_rboard_seed=replay_daily_board_seed;
             	current_rboard_type='q';
-            	SetupReplayBoard(current_rboard_type,current_rboard_seed);
+              current_rboard_first=replay_daily_first;
+              current_rboard_second=replay_daily_second;
+            	SetupReplayBoard();
               this.scene.switch("playGame");
 
           }else if(gameObject.object_type=='replay_weekly_button'){
 
               current_rboard_seed=replay_weekly_board_seed;
             	current_rboard_type='f';
-            	SetupReplayBoard(current_rboard_type,current_rboard_seed);
+              current_rboard_first=replay_weekly_first;
+              current_rboard_second=replay_weekly_second;
+            	SetupReplayBoard();
               this.scene.switch("playGame");
 
-          }else if(gameObject.object_type=='splash'){
-              PlayAudio2(6);
-              gameObject.destroy();
           }else if(gameObject.object_type=='website'){
 
-              window.open("https://discord.gg/AVHRPhJ", "_blank");
+              window.open("https://louigiverona.com/ps/?page=community", "_blank");
 
           }else if(gameObject.object_type=='settings_button'){
 
               PlayAudio2(6);
               this.scene.switch("showSettings");
 
-          }else if(gameObject.object_type=='full_screen_button'){
-
-                      if (PhaserContext.scale.isFullscreen)
-                      {
-                          full_screen_button.setFrame(0);
-                          PhaserContext.scale.stopFullscreen();
-                      }else
-                      {
-                          full_screen_button.setFrame(1);
-                          PhaserContext.scale.startFullscreen();
-                      }
           }else if(gameObject.object_type=='close_button'){
 
                     if(is_there_board==0){//if no board has been generated, we just go to Daily
@@ -634,6 +617,106 @@ var showMenu = new Phaser.Class({
     }
 
 
+});
+
+var playMenu = new Phaser.Class({
+    Extends: Phaser.Scene,
+    initialize:
+    function setupGame(){
+        Phaser.Scene.call(this, {key: "playMenu"});
+    },
+    create: function(){
+
+      this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, "gameover_background");
+
+
+      var play_again_button=this.add.image(this.game.renderer.width / 2, 312, "standard_menu_buttons").setInteractive();
+      play_again_button.setFrame(1);
+      play_again_button.object_type='play_same_board';
+
+      //making a differentiation between replays and playmode boards, so that different labels get shown
+      if(board_seed){
+        this.add.text(this.game.renderer.width / 2, 312,'Reload Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
+      }else{
+        this.add.text(this.game.renderer.width / 2, 312,'Play Board', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
+      }
+
+
+      //we show the solution button only if the solution exists
+      if(board_seed && replay_custom_first){
+
+        var replay_daily_button=this.add.image(this.game.renderer.width / 2, 832+showMenu_offset, "narrow_menu_buttons").setInteractive();
+        replay_daily_button.setFrame(0);
+        replay_daily_button.object_type='replay_custom_board_button';
+        var yest = this.add.text(this.game.renderer.width / 2, 832+showMenu_offset,'Watch Current Solution', { fontFamily:'Heebo', fontSize: '32pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 40, descent: 8, fontSize: 48} }).setOrigin(0.5,0.5);
+
+      }
+
+
+
+      var goto_menu__button=this.add.image(this.game.renderer.width / 2, 932, "narrow_menu_buttons").setInteractive();
+      goto_menu__button.setFrame(1);
+      goto_menu__button.object_type='goto_menu';
+      this.add.text(this.game.renderer.width / 2, 932,'Back to Title', { fontFamily:'Ubuntu', fontSize: '36pt', color: '#fff', fontStyle: 'bold', metrics:{ascent: 46, descent: 9, fontSize: 55} }).setOrigin(0.5,0.5);
+
+      var close_button=this.add.image(this.game.renderer.width / 2, 1070+showMenu_offset, "close_button").setInteractive();
+      close_button.object_type='close_button';
+
+      this.input.on('gameobjectdown', function(pointer,gameObject){
+
+        if(gameObject.object_type=='play_same_board'){
+
+            //switching from replay mode in any case
+            ReplayPanel(0);
+
+            //setting up playmode for a replay board
+            if(board_seed==''){//if board_seed is empty, that means it's a replay board
+              board_seed=current_rboard_seed;
+              board_type=current_rboard_type;
+              CreateLevel();
+            }else{
+              CreateLevel();
+            }
+
+            PlayAudio2(6);
+            //this.scene.stop();
+            this.scene.switch("playGame");
+
+
+
+
+          }else if(gameObject.object_type=='replay_custom_board_button'){
+
+              current_rboard_seed=board_seed;
+            	current_rboard_type=board_type;
+
+              //setting up the solutions for daily, weekly or custom
+              if(board_seed==replay_daily_board_seed){//yesterday's board
+                current_rboard_first=replay_daily_first;
+                current_rboard_second=replay_daily_second;
+              }else if(board_seed==replay_weekly_board_seed){//last week's board
+                current_rboard_first=replay_weekly_first;
+                current_rboard_second=replay_weekly_second;
+              }else{//custom board
+                current_rboard_first=replay_custom_first;
+                current_rboard_second=replay_custom_second;
+              }
+
+            	SetupReplayBoard();
+              this.scene.switch("playGame");
+
+          }else if(gameObject.object_type=='goto_menu'){
+            PlayAudio2(6);
+            this.scene.switch("showMenu");
+          }else if(gameObject.object_type=='close_button'){
+
+                    PlayAudio2(6);
+                    this.scene.switch("playGame");
+          }
+
+        },this);
+
+    }
 });
 
 var gameOver = new Phaser.Class({
@@ -814,6 +897,8 @@ var playGame = new Phaser.Class({
                   firstblk='';//resetting click
                   prevblk='';//variables
 
+                  //this is a block that I might use if I choose to go to title in case of daily or weekly
+
           //only in case this is a daily or weekly board
           if(is_there_board==1 && (board_seed==board_seed_daily || board_seed==board_seed_weekly)){
 
@@ -826,10 +911,17 @@ var playGame = new Phaser.Class({
                               weekly_button.setFrame(1);
                             }
 
+                            this.scene.switch("showMenu");
+
+          }else{
+            var playMenuScene = this.scene.get("playMenu");
+            this.scene.sleep("playGame");
+            playMenuScene.scene.restart();
           }
 
+
           PlayAudio2(6);
-          this.scene.switch("showMenu");
+
         }else if(gameObject.object_type=='last_block'){
           firstblk=gameObject;
           prevblk=gameObject;
@@ -851,13 +943,9 @@ var playGame = new Phaser.Class({
                   var block = blockGroup.getChildren();
 
                   //accessing the two necessary blocks and adding border images
-      						if(current_rboard_type=='q'){
-                    var first = block[replay_daily_first[current_move]];
-                    var second = block[replay_daily_second[current_move]];
-      						}else{
-                    var first = block[replay_weekly_first[current_move]];
-                    var second = block[replay_weekly_second[current_move]];
-      						}
+                  var first = block[current_rboard_first[current_move]];
+                  var second = block[current_rboard_second[current_move]];
+
                   if(total_blocks>0){//this is to make sure that we are not trying to access non-existing blocks at the very end of the game
                     var endgamecolorsaddition=0;//to make sure we color correctly during the endgame phase
                     if(endgame==1){endgamecolorsaddition=15;}
@@ -877,7 +965,7 @@ var playGame = new Phaser.Class({
               var block = blockGroup.getChildren();
 
               if(total_blocks==0){
-                SetupReplayBoard(current_rboard_type,current_rboard_seed);
+                SetupReplayBoard();
                 return;
               }
 
@@ -888,13 +976,9 @@ var playGame = new Phaser.Class({
           		PlayAudio2(9);
 
               //accessing the two necessary blocks and resetting selected blocks
-              if(current_rboard_type=='q'){
-                var first = block[replay_daily_first[current_move]];
-                var second = block[replay_daily_second[current_move]];
-              }else{
-                var first = block[replay_weekly_first[current_move]];
-                var second = block[replay_weekly_second[current_move]];
-              }
+              var first = block[current_rboard_first[current_move]];
+              var second = block[current_rboard_second[current_move]];
+
               var endgamecolorsaddition=0;//to make sure we color correctly during the endgame phase
               if(endgame==1){endgamecolorsaddition=15;}
               first.setFrame(first.block_value-1+endgamecolorsaddition+color_scheme);
@@ -913,13 +997,9 @@ var playGame = new Phaser.Class({
 
           			//stopping the simulation and resetting selected blocks
           			clearInterval(replay_interval);
-          			if(current_rboard_type=='q'){
-                  var first = block[replay_daily_first[current_move]];
-                  var second = block[replay_daily_second[current_move]];
-          			}else{
-                  var first = block[replay_weekly_first[current_move]];
-                  var second = block[replay_weekly_second[current_move]];
-          			}
+                var first = block[current_rboard_first[current_move]];
+                var second = block[current_rboard_second[current_move]];
+
                 var endgamecolorsaddition=0;//to make sure we color correctly during the endgame phase
                 if(endgame==1){endgamecolorsaddition=15;}
                 first.setFrame(first.block_value-1+endgamecolorsaddition+color_scheme);
@@ -1952,6 +2032,7 @@ function ServerCompareScore(){
 
 }
 
+//read yestedays and last weeks replays
 function ServerReadReplayPeriodical(){
 
   var xhttp = new XMLHttpRequest();
@@ -1980,13 +2061,32 @@ function ServerReadReplayPeriodical(){
   			replay_weekly_second= JSON.parse(replay[4]);
   			replay_weekly_board_seed=replay[5];
 
-  			//$('#replay_daily_sign').text("Solution From Yesterday");
-  			//$('#replay_daily_button').text("Yesterday's Board");
-  			//$('#replay_daily_button').attr('class','button_menu_solution');
+      }
+    }
+}
 
-  			//$('#replay_weekly_sign').text("Solution From Last Week");
-  			//$('#replay_weekly_button').text("Last Week's Board");
-  			//$('#replay_weekly_button').attr('class','button_menu_solution');
+//read a replay for a board from any date and write it into replay_custom_first and replay_custom_second
+function ServerReadReplayCustom(){
+
+  var xhttp = new XMLHttpRequest();
+
+  xhttp.open("POST", "read_custom_replay.php", true);
+  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  xhttp.timeout = 5000;
+  xhttp.send("board_seed="+board_seed+"&board_type="+board_type);
+
+  xhttp.onreadystatechange = function() {
+
+      if (this.readyState == 4 && this.status == 200) {
+        if (!this.responseText){
+  				return false;
+  			}
+
+  			var replay = JSON.parse(this.responseText);
+        replay_custom_first=JSON.parse(replay[0]);
+        replay_custom_second=JSON.parse(replay[1]);
+
+        //console.log(replay_custom_first);
       }
     }
 }
@@ -2127,7 +2227,7 @@ function ReplayPanel(state=0){
   }
 }
 
-function SetupReplayBoard(rboard_type,rboard_seed){
+function SetupReplayBoard(){
 
   //setup visuals
   ReplayPanel(1);
@@ -2135,15 +2235,11 @@ function SetupReplayBoard(rboard_type,rboard_seed){
 	PlayAudio2(6);
 
 	//setting board seed
-	board_seed=rboard_seed;
+	board_seed=current_rboard_seed;
 
-	if(rboard_type=='q'){
-    board_type='q';
-		replay_length=replay_daily_first.length-1;//amount if steps in a replay
-	}else{
-    board_type='f';
-		replay_length=replay_weekly_first.length-1;//amount if steps in a replay
-	}
+  //amount if steps in a replay
+  if(current_rboard_first) replay_length=current_rboard_first.length-1;
+	if(current_rboard_type=='q'){board_type='q';}else{board_type='f';}
 
   CreateReplayLevel();
 
@@ -2164,21 +2260,14 @@ function RunReplaySimulation(){
 	if(current_move<=0){current_move=1;}
 	//and a correction in case we are beyond the last replay frame
 	else if(current_move>=replay_length){
-		SetupReplayBoard(current_rboard_type,current_rboard_seed);
+		SetupReplayBoard();
 	}
 
 		replay_interval = setInterval(function (){
 
-
-
-						//accessing the two necessary blocks and adding border images
-						if(current_rboard_type=='q'){
-              var first = block[replay_daily_first[current_move]];
-              var second = block[replay_daily_second[current_move]];
-						}else{
-              var first = block[replay_weekly_first[current_move]];
-              var second = block[replay_weekly_second[current_move]];
-						}
+  	//accessing the two blocks and adding border images
+    var first = block[current_rboard_first[current_move]];
+    var second = block[current_rboard_second[current_move]];
 
 
 			switch(stage){
@@ -2202,7 +2291,7 @@ function RunReplaySimulation(){
 					if(current_move==replay_length){
 						clearInterval(replay_interval);
 
-						setTimeout(function (){SetupReplayBoard(current_rboard_type,current_rboard_seed);}, 750);
+						setTimeout(function (){SetupReplayBoard();}, 750);
 
 						//working the PLAY button
 						replay_is_active=0;
@@ -2231,15 +2320,8 @@ function RunReplayStep(){
 		//a correction, just in case current_move is less than 1
 		if(current_move<=0){current_move=1;}
 
-
-            if(current_rboard_type=='q'){
-              var first = block[replay_daily_first[current_move]];
-              var second = block[replay_daily_second[current_move]];
-            }else{
-              var first = block[replay_weekly_first[current_move]];
-              var second = block[replay_weekly_second[current_move]];
-            }
-
+            var first = block[current_rboard_first[current_move]];
+            var second = block[current_rboard_second[current_move]];
 
 				switch(replay_stage){
 
